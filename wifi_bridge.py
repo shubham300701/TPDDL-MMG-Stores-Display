@@ -372,7 +372,27 @@ class StoreRequestHandler(SimpleHTTPRequestHandler):
         # 3. Live Inventory State
         elif parsed.path == '/api/inventory':
             inv = get_inventory()
-            self._send_json({"timestamp": time.time(), "inventory": inv})
+            import datetime
+            now_dt = datetime.datetime.now()
+            d1_dt = now_dt + datetime.timedelta(days=1)
+            d2_dt = now_dt + datetime.timedelta(days=2)
+            d3_dt = now_dt + datetime.timedelta(days=3)
+            d1_short = d1_dt.strftime('%a')
+            d2_short = d2_dt.strftime('%a')
+            d3_short = d3_dt.strftime('%a')
+            for item in inv:
+                item['d1Day'] = d1_short
+                item['d2Day'] = d2_short
+                item['d3Day'] = d3_short
+            self._send_json({
+                "timestamp": time.time(),
+                "inventory": inv,
+                "forecastDays": {
+                    "d1": d1_short,
+                    "d2": d2_short,
+                    "d3": d3_short
+                }
+            })
             return
 
         # 4. Pending Requests Queue

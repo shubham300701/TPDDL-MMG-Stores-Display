@@ -1085,17 +1085,17 @@
           <th>Meter Type / Description</th>
           <th class="num" style="width: 170px;">
             Opening Stock
-            <span class="th-sub">(as of 17.10.2026)</span>
+            <span class="th-sub" id="thOpeningSub">(as of 18.10.2026)</span>
           </th>
           <th class="num" style="width: 170px;">
             Total Issued
-            <span class="th-sub">(as of today, 18.10.2026)</span>
+            <span class="th-sub" id="thIssuedSub">(as of today, 19.10.2026)</span>
           </th>
           <th class="num" style="width: 155px;">Available in Store</th>
           <th style="width: 140px; text-align: center;">Stock Status</th>
           <th class="num" style="width: 295px;">
             Predicted 3-Day Demand
-            <span class="th-sub">(19 Oct to 21 Oct)</span>
+            <span class="th-sub" id="thPredictionSub">(20 Oct to 22 Oct)</span>
           </th>
         </tr>
       </thead>
@@ -1218,11 +1218,11 @@
       <div class="modal-body">
         <div class="kpi-row">
           <div class="kpi-card">
-            <div class="kpi-label">Opening Stock (17.10)</div>
+            <div class="kpi-label" id="kpiOpeningLabel">Opening Stock</div>
             <div class="kpi-val" id="kpiOpening">0</div>
           </div>
           <div class="kpi-card">
-            <div class="kpi-label">Total Issued (18.10)</div>
+            <div class="kpi-label" id="kpiIssuedLabel">Total Issued</div>
             <div class="kpi-val" id="kpiIssued" style="color: var(--accent-cyan);">0</div>
           </div>
           <div class="kpi-card">
@@ -1238,15 +1238,15 @@
         <div class="forecast-banner">
           <div class="forecast-days">
             <div class="forecast-day-box">
-              <div class="day-title">Mon (19 Oct)</div>
+              <div class="day-title" id="fcDay1Title">Tue (20 Oct)</div>
               <div class="day-qty" id="fcDay1">--</div>
             </div>
             <div class="forecast-day-box">
-              <div class="day-title">Tue (20 Oct)</div>
+              <div class="day-title" id="fcDay2Title">Wed (21 Oct)</div>
               <div class="day-qty" id="fcDay2">--</div>
             </div>
             <div class="forecast-day-box">
-              <div class="day-title">Wed (21 Oct)</div>
+              <div class="day-title" id="fcDay3Title">Thu (22 Oct)</div>
               <div class="day-qty" id="fcDay3">--</div>
             </div>
           </div>
@@ -1704,6 +1704,94 @@
     let currentFilter = '1M';
     let focusedIndex = 0;
 
+    // =========================================================================
+    // DYNAMIC 3-DAY FORECAST & ROLLING DATE ENGINE (Auto-advances every midnight)
+    // =========================================================================
+    function getForecastDayInfo(baseDate = new Date()) {
+      const d1 = new Date(baseDate);
+      d1.setDate(d1.getDate() + 1);
+
+      const d2 = new Date(baseDate);
+      d2.setDate(d2.getDate() + 2);
+
+      const d3 = new Date(baseDate);
+      d3.setDate(d3.getDate() + 3);
+
+      const prev = new Date(baseDate);
+      prev.setDate(prev.getDate() - 1);
+
+      const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      const pad = (n) => String(n).padStart(2, '0');
+
+      const fmtShortDate = (d) => `${d.getDate()} ${monthsShort[d.getMonth()]}`;
+      const fmtDottedDate = (d) => `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()}`;
+      const fmtShortDayDate = (d) => `${pad(d.getDate())}.${pad(d.getMonth() + 1)}`;
+
+      return {
+        today: {
+          fullDate: fmtDottedDate(baseDate),
+          shortDate: fmtShortDayDate(baseDate),
+          dayShort: shortDays[baseDate.getDay()],
+          dayFull: fullDays[baseDate.getDay()]
+        },
+        yesterday: {
+          fullDate: fmtDottedDate(prev),
+          shortDate: fmtShortDayDate(prev)
+        },
+        d1: {
+          short: shortDays[d1.getDay()],
+          full: fullDays[d1.getDay()],
+          dateStr: fmtShortDate(d1),
+          label: `${shortDays[d1.getDay()]} (${fmtShortDate(d1)})`
+        },
+        d2: {
+          short: shortDays[d2.getDay()],
+          full: fullDays[d2.getDay()],
+          dateStr: fmtShortDate(d2),
+          label: `${shortDays[d2.getDay()]} (${fmtShortDate(d2)})`
+        },
+        d3: {
+          short: shortDays[d3.getDay()],
+          full: fullDays[d3.getDay()],
+          dateStr: fmtShortDate(d3),
+          label: `${shortDays[d3.getDay()]} (${fmtShortDate(d3)})`
+        },
+        rangeStr: `(${fmtShortDate(d1)} to ${fmtShortDate(d3)})`
+      };
+    }
+
+    function updateDynamicHeaderDates() {
+      const fc = getForecastDayInfo();
+      const thPredictionSub = document.getElementById('thPredictionSub');
+      if (thPredictionSub) thPredictionSub.textContent = fc.rangeStr;
+
+      const thOpeningSub = document.getElementById('thOpeningSub');
+      if (thOpeningSub) thOpeningSub.textContent = `(as of ${fc.yesterday.fullDate})`;
+
+      const thIssuedSub = document.getElementById('thIssuedSub');
+      if (thIssuedSub) thIssuedSub.textContent = `(as of today, ${fc.today.fullDate})`;
+
+      const fcDay1Title = document.getElementById('fcDay1Title');
+      if (fcDay1Title) fcDay1Title.textContent = fc.d1.label;
+
+      const fcDay2Title = document.getElementById('fcDay2Title');
+      if (fcDay2Title) fcDay2Title.textContent = fc.d2.label;
+
+      const fcDay3Title = document.getElementById('fcDay3Title');
+      if (fcDay3Title) fcDay3Title.textContent = fc.d3.label;
+
+      const kpiOpeningLabel = document.getElementById('kpiOpeningLabel');
+      if (kpiOpeningLabel) kpiOpeningLabel.textContent = `Opening Stock (${fc.yesterday.shortDate})`;
+
+      const kpiIssuedLabel = document.getElementById('kpiIssuedLabel');
+      if (kpiIssuedLabel) kpiIssuedLabel.textContent = `Total Issued (${fc.today.shortDate})`;
+    }
+
+    let lastKnownDateStr = "";
+
     // CLOCK RUNNER (STACKED TIME ON TOP, DATE BELOW)
     function updateLiveClock() {
       const now = new Date();
@@ -1717,6 +1805,13 @@
       const dateEl = document.getElementById('liveClockDate');
       if (timeEl) timeEl.textContent = timeStr;
       if (dateEl) dateEl.textContent = dateStr;
+
+      // Auto-advance rolling forecast & headers when midnight crosses
+      if (lastKnownDateStr && lastKnownDateStr !== dateStr) {
+        updateDynamicHeaderDates();
+        renderMainTable();
+      }
+      lastKnownDateStr = dateStr;
     }
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
@@ -1737,6 +1832,8 @@
     // RENDER MAIN INVENTORY TABLE (STRAIGHT ALIGNMENT)
     // =========================================================================
     function renderMainTable() {
+      updateDynamicHeaderDates();
+      const fc = getForecastDayInfo();
       const tbody = document.getElementById('inventoryTableBody');
       tbody.innerHTML = "";
       let totalStock = 0;
@@ -1779,6 +1876,10 @@
           predBadgeHtml = `<span class="pred-badge pred-warn">⚠ LOW BUFFER</span>`;
         }
 
+        const d1Day = item.d1Day || fc.d1.short;
+        const d2Day = item.d2Day || fc.d2.short;
+        const d3Day = item.d3Day || fc.d3.short;
+
         const tr = document.createElement('tr');
         tr.id = 'row-' + item.code;
         tr.dataset.meterName = item.name;
@@ -1793,13 +1894,13 @@
               <div class="item-sync-meta">
                 <span class="code-tag">${item.code}</span>
                 <span class="row-last-updated" title="Individual transaction sync timestamp for this meter">
-                  Last updated on: <span class="update-time-highlight">${item.lastUpdated || '18.10.2026, 09:30 AM'}</span>
+                  Last updated on: <span class="update-time-highlight">${item.lastUpdated || (fc.today.fullDate + ', 09:30 AM')}</span>
                 </span>
               </div>
             </div>
           </td>
           <td class="num" style="color: var(--text-muted); font-size: 15px; font-weight: 700;">${item.opening.toLocaleString()}</td>
-          <td class="num" style="color: var(--tp-blue); font-size: 15px; font-weight: 800;">-${item.issued.toLocaleString()}</td>
+          <td class="num" style="color: var(--tp-blue); font-size: 15px; font-weight: 800;">-${issued.toLocaleString()}</td>
           <td class="num"><span class="stock-badge ${badgeClass}">${available.toLocaleString()}</span></td>
           <td style="text-align: center;">
             <span class="status-tag ${badgeClass}">
@@ -1815,7 +1916,7 @@
               </div>
               <div class="pred-details-col">
                 ${predBadgeHtml}
-                <span class="pred-mini-split">Mon:${item.d1} | Tue:${item.d2} | Wed:${item.d3}</span>
+                <span class="pred-mini-split">${d1Day}:${item.d1 || 0} | ${d2Day}:${item.d2 || 0} | ${d3Day}:${item.d3 || 0}</span>
               </div>
             </div>
           </td>
@@ -2162,25 +2263,43 @@
     // =========================================================================
     function openAnalyticsModal(item) {
       selectedMeter = item;
-      const available = item.opening - item.issued;
-      const totalForecast = item.d1 + item.d2 + item.d3;
+      const opening = Number(item.opening) || 0;
+      const rawIssued = Number(item.issued) || 0;
+      const issued = Math.min(rawIssued, opening);
+      const available = (typeof item.available === 'number')
+        ? Math.max(0, item.available)
+        : (opening - issued);
+      const totalForecast = (item.d1 || 0) + (item.d2 || 0) + (item.d3 || 0);
+      const fc = getForecastDayInfo();
 
       document.getElementById('modalMeterName').textContent = `${item.name} (${item.code})`;
-      document.getElementById('kpiOpening').textContent = item.opening.toLocaleString();
-      document.getElementById('kpiIssued').textContent = item.issued.toLocaleString();
+      document.getElementById('kpiOpening').textContent = opening.toLocaleString();
+      document.getElementById('kpiIssued').textContent = issued.toLocaleString();
       document.getElementById('kpiAvailable').textContent = available.toLocaleString();
       document.getElementById('kpiForecastTotal').textContent = `${totalForecast} units`;
 
-      document.getElementById('fcDay1').textContent = `${item.d1}`;
-      document.getElementById('fcDay2').textContent = `${item.d2}`;
-      document.getElementById('fcDay3').textContent = `${item.d3}`;
+      const kpiOpening = document.getElementById('kpiOpeningLabel');
+      if (kpiOpening) kpiOpening.textContent = `Opening Stock (${fc.yesterday.shortDate})`;
+      const kpiIssued = document.getElementById('kpiIssuedLabel');
+      if (kpiIssued) kpiIssued.textContent = `Total Issued (${fc.today.shortDate})`;
+
+      const d1TitleEl = document.getElementById('fcDay1Title');
+      if (d1TitleEl) d1TitleEl.textContent = `${item.d1Day || fc.d1.short} (${fc.d1.dateStr})`;
+      const d2TitleEl = document.getElementById('fcDay2Title');
+      if (d2TitleEl) d2TitleEl.textContent = `${item.d2Day || fc.d2.short} (${fc.d2.dateStr})`;
+      const d3TitleEl = document.getElementById('fcDay3Title');
+      if (d3TitleEl) d3TitleEl.textContent = `${item.d3Day || fc.d3.short} (${fc.d3.dateStr})`;
+
+      document.getElementById('fcDay1').textContent = `${item.d1 || 0}`;
+      document.getElementById('fcDay2').textContent = `${item.d2 || 0}`;
+      document.getElementById('fcDay3').textContent = `${item.d3 || 0}`;
 
       const advEl = document.getElementById('fcAdvisory');
       if (available < totalForecast) {
         const deficit = totalForecast - available;
         advEl.innerHTML = `<span style="color: var(--status-low); font-weight: 800;">🚨 URGENT INDENT REQUIRED:</span> 3-day expected demand (${totalForecast} units) exceeds available store stock (${available}) by <b>${deficit} units</b>. Initiate immediate stock transfer or purchase requisition of minimum 150 units.`;
       } else if (available < totalForecast * 1.5) {
-        advEl.innerHTML = `<span style="color: var(--status-mid); font-weight: 800;">⚠️ TIGHT BUFFER:</span> Store stock will drop to approximately <b>${available - totalForecast} units</b> by Wednesday. Regular procurement recommended.`;
+        advEl.innerHTML = `<span style="color: var(--status-mid); font-weight: 800;">⚠️ TIGHT BUFFER:</span> Store stock will drop to approximately <b>${available - totalForecast} units</b> by ${fc.d3.full}. Regular procurement recommended.`;
       } else {
         advEl.innerHTML = `<span style="color: var(--status-ok); font-weight: 800;">✓ STOCK SATISFACTORY:</span> Available store inventory safely covers the 3-day projected issuance (${totalForecast} units) with healthy safety margin.`;
       }

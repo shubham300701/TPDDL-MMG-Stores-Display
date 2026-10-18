@@ -84,9 +84,30 @@ function doGet(e) {
     }
   }
 
+  // Dynamic rolling 3-day forecast day names (Auto-advances every midnight)
+  var now = new Date();
+  var daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  var day1 = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
+  var day2 = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
+  var day3 = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+  var d1Label = daysShort[day1.getDay()];
+  var d2Label = daysShort[day2.getDay()];
+  var d3Label = daysShort[day3.getDay()];
+
+  for (var m = 0; m < inventory.length; m++) {
+    inventory[m].d1Day = d1Label;
+    inventory[m].d2Day = d2Label;
+    inventory[m].d3Day = d3Label;
+  }
+
   var response = {
     status: "success",
-    timestamp: new Date().toISOString(),
+    timestamp: now.toISOString(),
+    forecastDays: {
+      d1: d1Label,
+      d2: d2Label,
+      d3: d3Label
+    },
     inventory: inventory,
     audit: recentAudit
   };
