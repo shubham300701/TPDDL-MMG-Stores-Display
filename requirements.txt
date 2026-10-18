@@ -1,0 +1,2 @@
+# Python standard library used
+urllib3>=2.0.0

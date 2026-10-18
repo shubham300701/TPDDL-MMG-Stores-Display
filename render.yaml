@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: tpddl-mmg-stores-display
+    env: python
+    plan: free
+    region: oregon
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python wifi_bridge.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9

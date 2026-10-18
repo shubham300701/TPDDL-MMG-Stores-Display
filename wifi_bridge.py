@@ -28,7 +28,7 @@ import time
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 import urllib.parse
 
-PORT = 8765
+PORT = int(os.environ.get('PORT', 8765))
 IS_WINDOWS = platform.system().lower() == 'windows'
 
 INVENTORY_FILE = "inventory_state.json"
