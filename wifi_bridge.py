@@ -475,7 +475,7 @@ class StoreRequestHandler(SimpleHTTPRequestHandler):
             audit.insert(0, audit_entry)
             save_json(AUDIT_FILE, audit)
 
-            # If Approved, update inventory immediately!
+            # If Approved, update inventory immediately — with hard stock validation!
             updated_meter = None
             if decision == "APPROVED" and m_name and qty > 0:
                 for row in inv:
@@ -483,9 +483,26 @@ class StoreRequestHandler(SimpleHTTPRequestHandler):
                     r_code = row["code"].lower()
                     if (r_name in m_name) or (m_name in r_name) or (r_code in m_name) or (m_name in r_code):
                         if is_issue:
-                            row["issued"] += qty
+                            opening = int(row.get("opening", 0))
+                            current_issued = min(int(row.get("issued", 0)), opening)
+                            available = opening - current_issued
+
+                            # ── HARD RULE: issued can NEVER exceed opening stock ──
+                            if qty > available:
+                                self._send_json({
+                                    "success": False,
+                                    "blocked": True,
+                                    "error": f"ISSUE BLOCKED: Only {available} units available for '{row['name']}'. "
+                                             f"Requested {qty} exceeds available stock (Opening: {opening}, Issued: {current_issued}).",
+                                    "available": available,
+                                    "opening": opening,
+                                    "requested": qty
+                                })
+                                return
+                            row["issued"] = current_issued + qty  # Safe — validated above
                         else:
-                            row["opening"] += qty
+                            # INWARD: always safe to add to opening stock
+                            row["opening"] = int(row.get("opening", 0)) + qty
                         row["lastUpdated"] = time.strftime("%d.%m.%Y, %I:%M %p")
                         updated_meter = row
                         break

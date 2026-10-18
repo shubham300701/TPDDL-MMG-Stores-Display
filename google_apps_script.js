@@ -1,18 +1,17 @@
 /**
  * ============================================================================
- * TATA POWER-DDL (MMG STORES, KESHAVPURAM) — GOOGLE APPS SCRIPT WEB BACKEND
+ * TATA POWER-DDL (MMG STORES, KESHAVPURAM) — GOOGLE APPS SCRIPT WEB BACKEND (Code.gs)
  * ============================================================================
  * Instructions:
- * 1. In your uploaded Google Sheet, click on "Extensions" -> "Apps Script".
- * 2. Delete any default code in Code.gs and paste this entire file.
- * 3. Click "Save" (Disk icon).
- * 4. Click "Deploy" (blue button at top right) -> "New deployment".
- * 5. Select type: "Web app" (click the gear icon -> Web app).
- * 6. Set Description: "TPDDL MMG Live Store API"
- * 7. Set "Execute as": "Me"
- * 8. Set "Who has access": "Anyone" (crucial so mobile phones and displays can read/write without login prompt).
- * 9. Click "Deploy", authorize permissions, and COPY the generated Web App URL!
- *    (e.g., https://script.google.com/macros/s/AKfyc.../exec)
+ * 1. Open your Google Spreadsheet (with Master_Inventory, Predictive_Engine_3Day, etc.).
+ * 2. Click "Extensions" -> "Apps Script".
+ * 3. Replace all existing text in Code.gs with this entire script.
+ * 4. Click the Save icon (Disk).
+ * 5. Click "Deploy" (top right) -> "Manage deployments" (or "New deployment").
+ *    - Click the Edit (pencil) icon -> select "New version".
+ *    - Execute as: "Me"
+ *    - Who has access: "Anyone"
+ *    - Click "Deploy".
  * ============================================================================
  */
 
@@ -165,6 +164,28 @@ function doPost(e) {
 
           if (isIssue) {
             var currIssued = Number(masterData[r][7]) || 0;
+            var opening    = Number(masterData[r][5]) || 0;
+            var available  = Number(masterData[r][8]) || 0; // Col I (Available) — pre-computed by sheet formula
+
+            // ══════════════════════════════════════════════════════════════
+            // HARD RULE: Issued qty can NEVER exceed Opening Stock / Available
+            // This is the last line of defence (Layer 4 — GAS backend)
+            // ══════════════════════════════════════════════════════════════
+            if (qty > available) {
+              return ContentService.createTextOutput(JSON.stringify({
+                success:   false,
+                blocked:   true,
+                error:     "ISSUE BLOCKED (GAS Layer 4): Only " + available +
+                           " units available for '" + meterFullName +
+                           "'. Requested " + qty + " exceeds available stock (Opening: " + opening + ").",
+                available: available,
+                opening:   opening,
+                requested: qty,
+                meter:     meterFullName,
+                code:      meterCode
+              })).setMimeType(ContentService.MimeType.JSON);
+            }
+
             masterSheet.getRange(updatedRowIndex, 8).setValue(currIssued + qty); // Col H (Issued)
           } else {
             var currInward = Number(masterData[r][6]) || 0;

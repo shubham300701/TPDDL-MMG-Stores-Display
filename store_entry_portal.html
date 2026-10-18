@@ -847,6 +847,46 @@
         remarks: remarks
       };
 
+      // =====================================================================
+      // RULE: For ISSUE/OUTWARD — qty must NOT exceed current available stock
+      // =====================================================================
+      if (type === 'ISSUE' || type === 'OUTWARD') {
+        let currentInventory = DEFAULT_INVENTORY;
+        try {
+          const stored = localStorage.getItem('tpddl_inventory_data');
+          if (stored) currentInventory = JSON.parse(stored);
+        } catch (e) {}
+
+        const meterKey = meter.toLowerCase();
+        const matchedRow = currentInventory.find(row =>
+          row.name.toLowerCase().includes(meterKey) ||
+          meterKey.includes(row.name.toLowerCase()) ||
+          row.code.toLowerCase().includes(meterKey)
+        );
+
+        if (matchedRow) {
+          const opening = Number(matchedRow.opening) || 0;
+          const issued = Math.min(Number(matchedRow.issued) || 0, opening);
+          const available = (typeof matchedRow.available === 'number')
+            ? Math.max(0, matchedRow.available)
+            : (opening - issued);
+
+          if (qty > available) {
+            showAlert(
+              `❌ ISSUE BLOCKED — Cannot issue ${qty} units of "${meter}".\n` +
+              `Available in store: ${available} units | Opening Stock: ${opening} units.\n` +
+              `Issued quantity must not exceed the available stock balance.`,
+              'error'
+            );
+            return; // Stop submission
+          }
+          if (qty <= 0) {
+            showAlert(`❌ Quantity must be at least 1 unit.`, 'error');
+            return;
+          }
+        }
+      }
+
       pendingQueue.unshift(newReq);
       try {
         localStorage.setItem('tpddl_pending_queue', JSON.stringify(pendingQueue));
@@ -996,10 +1036,31 @@
         let matched = false;
         for (let row of inventory) {
           if (row.name.toLowerCase().includes(targetMeterName) || targetMeterName.includes(row.name.toLowerCase()) || targetMeterName.includes(row.code.toLowerCase())) {
-            if (item.type === 'ISSUE') {
-              row.issued += item.qty;
+            const opening = Number(row.opening) || 0;
+            const currentIssued = Math.min(Number(row.issued) || 0, opening);
+            const currentAvailable = (typeof row.available === 'number')
+              ? Math.max(0, row.available)
+              : (opening - currentIssued);
+
+            if (item.type === 'ISSUE' || item.type === 'OUTWARD') {
+              // ── HARD RULE: issued qty must not exceed available stock ──
+              if (item.qty > currentAvailable) {
+                showAlert(
+                  `❌ APPROVAL BLOCKED — "${item.meter}" has only ${currentAvailable} units available.\n` +
+                  `Requested: ${item.qty} units exceeds available stock.\n` +
+                  `Auto-rejecting this request to prevent negative inventory.`,
+                  'error'
+                );
+                // Auto-reject: update audit log entry
+                auditEntry.status = 'REJECTED';
+                auditEntry.remarks = `Auto-rejected: Insufficient stock (Available: ${currentAvailable}, Requested: ${item.qty})`;
+                renderAuditTable();
+                return;
+              }
+              row.issued = currentIssued + item.qty; // Safe — validated above
             } else {
-              row.opening += item.qty;
+              // INWARD: always safe to add to opening stock
+              row.opening = opening + item.qty;
             }
             row.lastUpdated = nowStamp;
             matched = true;

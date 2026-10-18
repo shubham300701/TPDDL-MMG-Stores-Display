@@ -164,6 +164,28 @@ function doPost(e) {
 
           if (isIssue) {
             var currIssued = Number(masterData[r][7]) || 0;
+            var opening    = Number(masterData[r][5]) || 0;
+            var available  = Number(masterData[r][8]) || 0; // Col I (Available) — pre-computed by sheet formula
+
+            // ══════════════════════════════════════════════════════════════
+            // HARD RULE: Issued qty can NEVER exceed Opening Stock / Available
+            // This is the last line of defence (Layer 4 — GAS backend)
+            // ══════════════════════════════════════════════════════════════
+            if (qty > available) {
+              return ContentService.createTextOutput(JSON.stringify({
+                success:   false,
+                blocked:   true,
+                error:     "ISSUE BLOCKED (GAS Layer 4): Only " + available +
+                           " units available for '" + meterFullName +
+                           "'. Requested " + qty + " exceeds available stock (Opening: " + opening + ").",
+                available: available,
+                opening:   opening,
+                requested: qty,
+                meter:     meterFullName,
+                code:      meterCode
+              })).setMimeType(ContentService.MimeType.JSON);
+            }
+
             masterSheet.getRange(updatedRowIndex, 8).setValue(currIssued + qty); // Col H (Issued)
           } else {
             var currInward = Number(masterData[r][6]) || 0;
