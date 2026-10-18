@@ -1850,13 +1850,13 @@
         const totalForecast3D = (item.d1 || 0) + (item.d2 || 0) + (item.d3 || 0);
 
         let badgeClass = "stock-ok";
-        let statusLabel = "✓ NORMAL";
+        let statusLabel = "NORMAL";
         let statusIcon = `<svg style="width: 12px; height: 12px; fill: var(--status-ok);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>`;
 
         // Flag data-entry error: issued > opening (should never happen after fix)
         if (rawIssued > opening) {
           badgeClass = "stock-low";
-          statusLabel = "⚠ DATA ERR";
+          statusLabel = "DATA ERR";
           statusIcon = `<svg style="width: 12px; height: 12px; fill: #dc2626;" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>`;
         } else if (available <= item.low) {
           badgeClass = "stock-low";
