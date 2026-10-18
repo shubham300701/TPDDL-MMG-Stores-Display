@@ -1391,29 +1391,9 @@
       { id: 10, code: "TPDDL-MTR-10", name: "Energy Meter 3-Phase",      opening: 450, issued: 210, low: 30, high: 75, d1: 22, d2: 20, d3: 19, lastUpdated: "17.10.2026, 03:20 PM" }
     ];
 
+    // Always start with DEFAULT_INVENTORY for immediate render.
+    // fetchLiveInventoryFromBridge() will overwrite this with live Google Sheets data.
     let inventoryData = DEFAULT_INVENTORY;
-    try {
-      const saved = localStorage.getItem('tpddl_inventory_data');
-      if (saved) {
-        inventoryData = JSON.parse(saved);
-        // Ensure every item has a lastUpdated timestamp
-        let needsSave = false;
-        inventoryData.forEach(item => {
-          if (!item.lastUpdated) {
-            const def = DEFAULT_INVENTORY.find(d => d.code === item.code);
-            item.lastUpdated = def ? def.lastUpdated : "18.10.2026, 09:30 AM";
-            needsSave = true;
-          }
-        });
-        if (needsSave) {
-          localStorage.setItem('tpddl_inventory_data', JSON.stringify(inventoryData));
-        }
-      } else {
-        localStorage.setItem('tpddl_inventory_data', JSON.stringify(DEFAULT_INVENTORY));
-      }
-    } catch (e) {
-      console.warn("Storage access:", e);
-    }
 
     // PURE STORE DISPLAY / KIOSK MODE DETECTION (?kiosk=1 or ?display=1)
     const urlParams = new URLSearchParams(window.location.search);
@@ -1616,6 +1596,10 @@
     function handleNewInventoryData(newInventory, sourceLabel) {
       const currentStr = JSON.stringify(inventoryData);
       const newStr = JSON.stringify(newInventory);
+      // Always update on first cloud fetch, or when data has changed
+      inventoryData = newInventory;
+      localStorage.setItem('tpddl_inventory_data', newStr);
+      renderMainTable();
       if (currentStr !== newStr) {
         let changedMeter = null;
         if (Array.isArray(inventoryData)) {
@@ -1627,19 +1611,16 @@
             }
           }
         }
-        inventoryData = newInventory;
-        localStorage.setItem('tpddl_inventory_data', newStr);
-        renderMainTable();
         if (changedMeter) {
           highlightRow(changedMeter);
           showInstantToast(`⚡ Stock Updated from ${sourceLabel}: ${changedMeter}`);
         } else {
-          showInstantToast(`⚡ Stock Synchronized with ${sourceLabel}`);
+          showInstantToast(`⚡ Live data from ${sourceLabel}`);
         }
         updateSyncTimestamp();
       }
     }
-    setInterval(fetchLiveInventoryFromBridge, 1000);
+    setInterval(fetchLiveInventoryFromBridge, 30000); // Poll every 30s (was 1s — too aggressive for GAS rate limits)
     fetchLiveInventoryFromBridge();
     updateCloudSyncUI();
 
@@ -1673,7 +1654,7 @@
     setInterval(checkOutboxCount, 5000); // re-check every 5s
 
     // Listen for outbox count updates from portal via BroadcastChannel
-    syncChannel.addEventListener('message', (event) => {
+    inventorySyncChannel.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'OUTBOX_COUNT') {
         updateDashboardOutboxBadge(event.data.count);
       }
@@ -1761,9 +1742,10 @@
       let totalStock = 0;
 
       inventoryData.forEach((item, index) => {
-        const available = item.opening - item.issued;
+        // Support both: pre-computed 'available' from Google Sheets, and calculated from local data
+        const available = (typeof item.available === 'number') ? item.available : (item.opening - item.issued);
         totalStock += available;
-        const totalForecast3D = item.d1 + item.d2 + item.d3;
+        const totalForecast3D = (item.d1 || 0) + (item.d2 || 0) + (item.d3 || 0);
 
         let badgeClass = "stock-ok";
         let statusLabel = "✓ NORMAL";
