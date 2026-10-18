@@ -1,0 +1,25 @@
+# TAB 1: Master Stock (Import into 'Master Stock' Tab),,,,
+Meter Type,Opening Stock,Low Threshold,High Threshold,Critical Threshold
+LTCT Meter,500,25,60,10
+PP WC Meter,300,20,50,8
+HT Meter,150,15,35,5
+Net Meter,400,30,70,12
+Prepaid Meter,250,20,50,10
+CT Ratio Meter,100,10,40,5
+Smart Meter,200,20,60,8
+Whole Current Meter,120,12,30,5
+Energy Meter (1-Phase),350,25,60,10
+Energy Meter (3-Phase),180,20,50,8
+,,,,
+# TAB 2: Daily Issues Sample (Import into 'Daily Issues' Tab),,,,
+Date,Meter Type,Qty Issued,Issued To / Site,Remarks
+17-Oct-26,LTCT Meter,55,Substation Block A,Phase 1 replacement
+17-Oct-26,PP WC Meter,12,Industrial Feeder 2,Regular maintenance
+17-Oct-26,HT Meter,142,Commercial Mega Zone,Heavy load expansion
+17-Oct-26,Net Meter,197,Solar Rooftop Scheme,Govt subsidized installs
+18-Oct-26,Prepaid Meter,215,Residential Sector 4,Apartment complex
+18-Oct-26,CT Ratio Meter,72,Grid Upgrade Div,Transformer matching
+18-Oct-26,Smart Meter,144,Smart City Pilot,Ward 12
+18-Oct-26,Whole Current Meter,111,Rural Electrification,Block B
+18-Oct-26,Energy Meter (1-Phase),255,Domestic Feeder,New connections
+18-Oct-26,Energy Meter (3-Phase),136,Commercial Plaza,Mall connection

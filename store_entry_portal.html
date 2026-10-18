@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TATA POWER-DDL | MMG Stores (KPM) — 2-Tier Stock Entry & Approval Portal</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --tp-blue: #004890;
+      --tp-light-blue: #0072ce;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif;
+      letter-spacing: 0.25px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-box {
+      background: #ffffff;
+      border: 1px solid rgba(0, 72, 144, 0.15);
+      border-radius: 6px;
+      padding: 2px 8px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+    }
+
+    .logo-box img {
+      max-height: 36px;
+      width: auto;
+    }
+
+    .brand-title h1 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--tp-blue);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+    .brand-title p {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* TABS */
+    .portal-tabs {
+      display: flex;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--tp-blue);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .tab-badge {
+      background: var(--danger);
+      color: #fff;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 800;
+    }
+
+    /* CARDS */
+    .portal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      display: none;
+    }
+
+    .portal-card.active {
+      display: block;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--tp-blue);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* FORM ELEMENTS */
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text);
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--tp-blue);
+      box-shadow: 0 0 0 3px rgba(0, 72, 144, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--tp-blue);
+      color: #fff;
+      border: none;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--tp-light-blue);
+    }
+
+    /* MANAGER PIN MODAL */
+    .pin-auth-box {
+      text-align: center;
+      padding: 30px 20px;
+    }
+
+    .pin-auth-box input {
+      width: 160px;
+      font-size: 26px;
+      text-align: center;
+      letter-spacing: 10px;
+      margin: 12px auto;
+    }
+
+    /* PENDING APPROVALS LIST */
+    .pending-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pending-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .req-tag {
+      font-size: 11px;
+      font-family: monospace;
+      color: var(--tp-light-blue);
+      font-weight: 700;
+      background: #eff6ff;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .pending-meta {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .pending-meta b {
+      color: var(--text);
+    }
+
+    .pending-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn-approve {
+      flex: 1;
+      background: var(--success);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-reject {
+      flex: 1;
+      background: var(--danger);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .alert-box {
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* AUDIT TABLE */
+    table.audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    table.audit-table th, table.audit-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    table.audit-table th {
+      background: #f1f5f9;
+      font-weight: 700;
+    }
+
+    /* AUDIT FILTER CONTROLS */
+    .audit-filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .audit-filter-bar input, .audit-filter-bar select {
+      padding: 7px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      outline: none;
+      background: #ffffff;
+    }
+    .audit-filter-bar input:focus, .audit-filter-bar select:focus {
+      border-color: var(--tp-blue);
+    }
+    .audit-count-pill {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--tp-blue);
+      background: rgba(0, 72, 144, 0.08);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+    .badge-inward {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e8f5e9;
+      color: #1b5e20;
+      border: 1px solid #c8e6c9;
+      white-space: nowrap;
+    }
+    .badge-outward {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #e1f5fe;
+      color: #0277bd;
+      border: 1px solid #b3e5fc;
+      white-space: nowrap;
+    }
+    .badge-status-approved {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+    }
+    .badge-status-rejected {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(239, 68, 68, 0.12);
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- OFFLINE OUTBOX FLOATING BADGE -->
+  <div id="offlineOutboxBadge" style="display: none; position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 99999; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 800; font-size: 13px; padding: 10px 22px; border-radius: 30px; box-shadow: 0 6px 24px rgba(217, 119, 6, 0.45); animation: pulseOutbox 1.8s ease-in-out infinite; letter-spacing: 0.3px;">
+    ⏳ 0 pending cloud syncs
+  </div>
+  <style>
+    @keyframes pulseOutbox {
+      0%, 100% { box-shadow: 0 6px 24px rgba(217,119,6,0.45); }
+      50% { box-shadow: 0 6px 36px rgba(217,119,6,0.75); }
+    }
+  </style>
+
+
+  <div class="container">
+    <!-- HEADER -->
+    <header>
+      <div class="brand">
+        <div class="logo-box">
+          <img src="tata_power_ddl_logo_clean.png" alt="TATA POWER-DDL" onerror="this.src='tata_power_ddl_logo.png'">
+        </div>
+        <div class="brand-title">
+          <h1>MMG Stores (KPM)</h1>
+          <p>Material Management Group • 2-Tier Stock Authorization Portal</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <div class="portal-tabs">
+      <button class="tab-btn active" onclick="switchPortalTab('tabEntry')">
+        <span>📝 Level 1: Staff Entry</span>
+      </button>
+      <button class="tab-btn" onclick="switchPortalTab('tabApproval')">
+        <span>🛡️ Level 2: Manager Approval</span>
+        <span class="tab-badge" id="pendingCountBadge">2</span>
+      </button>
+      <button class="tab-btn" onclick="switchPortalTab('tabAudit')">
+        <span>📋 Audit Logs</span>
+      </button>
+    </div>
+
+    <!-- ALERTS -->
+    <div id="alertBox" class="alert-box"></div>
+
+    <!-- =====================================================================
+         TAB 1: STORE STAFF ENTRY FORM (MAKER)
+         ===================================================================== -->
+    <div id="tabEntry" class="portal-card active">
+      <div class="card-title">
+        <span>📦 Storekeeper Dispatch & Inward Entry</span>
+      </div>
+
+      <form id="stockEntryForm" onsubmit="handleStaffSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Transaction Type</label>
+            <select id="entryType" required>
+              <option value="ISSUE" selected>📤 Issue Meter (Dispatched to Site)</option>
+              <option value="INWARD">📥 Inward Stock (New Received from Factory)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Quantity of Meters</label>
+            <input type="number" id="entryQty" min="1" max="5000" placeholder="e.g. 25" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Meter Type</label>
+          <select id="entryMeter" required>
+            <option value="LTCT Meter (Single Phase)">LTCT Meter (Single Phase) [TPDDL-MTR-01]</option>
+            <option value="PP WC Meter (Poly Phase)">PP WC Meter (Poly Phase) [TPDDL-MTR-02]</option>
+            <option value="HT Meter (High Tension)">HT Meter (High Tension CT/PT) [TPDDL-MTR-03]</option>
+            <option value="Net Meter (Solar Rooftop)">Net Meter (Solar Rooftop Bi-Directional) [TPDDL-MTR-04]</option>
+            <option value="Prepaid Smart Meter">Prepaid Smart Meter [TPDDL-MTR-05]</option>
+            <option value="CT Ratio Meter">CT Ratio Meter [TPDDL-MTR-06]</option>
+            <option value="Smart Grid AMI Meter">Smart Grid AMI Meter [TPDDL-MTR-07]</option>
+            <option value="Whole Current Meter">Whole Current Meter [TPDDL-MTR-08]</option>
+            <option value="Energy Meter 1-Phase">Energy Meter 1-Phase [TPDDL-MTR-09]</option>
+            <option value="Energy Meter 3-Phase">Energy Meter 3-Phase [TPDDL-MTR-10]</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Requisition Slip / Indent #</label>
+            <input type="text" id="entrySlip" placeholder="e.g. REQ-TPDDL-8891" required>
+          </div>
+
+          <div class="form-group">
+            <label>Substation / Division / Site</label>
+            <input type="text" id="entrySite" placeholder="e.g. Rohini Substation Feeder 2" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Issuing Storekeeper Name & ID</label>
+            <input type="text" id="entryStaff" placeholder="e.g. P. K. Verma (JE-8491)" required>
+          </div>
+
+          <div class="form-group">
+            <label>Remarks / Project</label>
+            <input type="text" id="entryRemarks" placeholder="e.g. Emergency Feeder Replacement">
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          🚀 Submit for Manager Approval
+        </button>
+      </form>
+    </div>
+
+    <!-- =====================================================================
+         TAB 2: MANAGER APPROVAL PORTAL (CHECKER)
+         ===================================================================== -->
+    <div id="tabApproval" class="portal-card">
+      <div id="managerLockBox" class="pin-auth-box">
+        <div style="font-size: 36px; margin-bottom: 8px;">🔐</div>
+        <h3 style="color: var(--tp-blue); font-size: 18px; font-weight: 800;">Manager Verification Required</h3>
+        <p style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">Enter 4-digit Manager Authorization PIN to view & approve store dispatches:</p>
+        <input type="password" id="mgrPinInput" maxlength="4" placeholder="••••">
+        <br>
+        <button class="btn-submit" style="width: 160px; padding: 10px;" onclick="unlockManagerPanel()">Unlock</button>
+        <p id="mgrPinErr" style="color: var(--danger); font-size: 12px; margin-top: 8px; display: none;">Invalid Manager PIN!</p>
+      </div>
+
+      <div id="managerQueueBox" style="display: none;">
+        <div class="card-title" style="justify-content: space-between;">
+          <span>🛡️ Pending Authorizations Queue</span>
+          <button style="background: none; border: none; color: var(--danger); font-weight: 700; cursor: pointer; font-size: 12px;" onclick="lockManagerPanel()">🔒 Lock</button>
+        </div>
+
+        <div id="pendingListContainer">
+          <!-- Pending items rendered here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         TAB 3: PERMANENT AUDIT LOGS WITH INWARD / OUTWARD FILTERS
+         ===================================================================== -->
+    <div id="tabAudit" class="portal-card">
+      <div class="card-title">
+        <span>📋 Historical Dispatch & Authorization Audit Log</span>
+      </div>
+      <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+        Immutable audit trail maintained in Google Sheets (`Audit_Approval_Log` tab) for corporate governance and regulatory compliance:
+      </p>
+
+      <!-- AUDIT FILTER BAR -->
+      <div class="audit-filter-bar">
+        <input type="text" id="auditSearchInput" placeholder="🔍 Search Req ID, Meter, Staff..." oninput="filterAuditLogs()">
+        
+        <select id="auditTypeFilter" onchange="filterAuditLogs()">
+          <option value="ALL">All Types (Inward & Outward)</option>
+          <option value="OUTWARD">📤 Outward / Issue (Site Dispatch)</option>
+          <option value="INWARD">📥 Inward / Receipt (New Stock)</option>
+        </select>
+
+        <select id="auditStatusFilter" onchange="filterAuditLogs()">
+          <option value="ALL">All Statuses</option>
+          <option value="APPROVED">✓ Approved Only</option>
+          <option value="REJECTED">✕ Rejected Only</option>
+        </select>
+
+        <select id="auditMeterFilter" onchange="filterAuditLogs()">
+          <option value="ALL">All 10 Meter Types</option>
+          <option value="LTCT">LTCT Meter</option>
+          <option value="PP WC">PP WC Meter</option>
+          <option value="HT">HT Meter</option>
+          <option value="Net Meter">Net Meter</option>
+          <option value="Prepaid">Prepaid Smart Meter</option>
+          <option value="CT Ratio">CT Ratio Meter</option>
+          <option value="Smart Grid">Smart Grid AMI Meter</option>
+          <option value="Whole Current">Whole Current Meter</option>
+          <option value="1-Phase">Energy Meter 1-Phase</option>
+          <option value="3-Phase">Energy Meter 3-Phase</option>
+        </select>
+
+        <span class="audit-count-pill" id="auditCountBadge">Showing 0 of 0</span>
+      </div>
+
+      <table class="audit-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Req ID</th>
+            <th>Direction (Inward/Outward)</th>
+            <th>Meter</th>
+            <th>Qty</th>
+            <th>Staff</th>
+            <th>Manager Status</th>
+          </tr>
+        </thead>
+        <tbody id="auditLogTbody">
+          <!-- Rendered dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // STATE & INSTANT SYNCHRONIZATION
+    // =========================================================================
+    const MANAGER_PIN = "9999";
+    let isManagerUnlocked = false;
+    const API_BRIDGE_URL = 'http://127.0.0.1:8765/api';
+
+    // BroadcastChannel for instant 0ms sync with open Dashboard tabs
+    const syncChannel = new BroadcastChannel('tpddl_inventory_sync');
+
+    // =========================================================================
+    // OFFLINE CLOUD OUTBOX — Queues transactions when internet is down,
+    // auto-replays them to Google Sheets when connectivity resumes.
+    // =========================================================================
+    let cloudOutbox = [];
+    try {
+      const saved = localStorage.getItem('tpddl_cloud_outbox');
+      if (saved) cloudOutbox = JSON.parse(saved);
+    } catch (e) {}
+
+    function saveOutbox() {
+      try { localStorage.setItem('tpddl_cloud_outbox', JSON.stringify(cloudOutbox)); } catch (e) {}
+      updateOutboxBadge();
+      // Also notify dashboard tabs about outbox count change
+      try { syncChannel.postMessage({ type: 'OUTBOX_COUNT', count: cloudOutbox.length }); } catch (e) {}
+    }
+
+    function enqueueToCloud(payload) {
+      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url');
+      if (!cloudUrl || cloudUrl.trim().length <= 15) return; // No cloud configured
+      cloudOutbox.push({ payload: payload, queuedAt: new Date().toISOString() });
+      saveOutbox();
+      flushOutbox(); // Attempt immediate send
+    }
+
+    async function flushOutbox() {
+      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url');
+      if (!cloudUrl || cloudUrl.trim().length <= 15) return;
+      if (cloudOutbox.length === 0) return;
+
+      // Check connectivity first with a lightweight probe
+      if (!navigator.onLine) return;
+
+      // Process queue FIFO — one at a time to preserve order
+      const batch = [...cloudOutbox];
+      let successCount = 0;
+
+      for (let i = 0; i < batch.length; i++) {
+        try {
+          const resp = await fetch(cloudUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(batch[i].payload)
+          });
+          // mode: 'no-cors' returns opaque response — treat as success if no exception
+          successCount++;
+        } catch (err) {
+          // Network still down — stop flushing, keep remaining in queue
+          break;
+        }
+      }
+
+      if (successCount > 0) {
+        cloudOutbox.splice(0, successCount);
+        saveOutbox();
+        if (successCount > 0 && cloudOutbox.length === 0) {
+          showAlert(`☁️ ${successCount} offline transaction(s) synced to Google Sheets successfully!`, 'success');
+        } else if (successCount > 0) {
+          showAlert(`☁️ ${successCount} synced, ${cloudOutbox.length} still queued (retrying...)`, 'warning');
+        }
+      }
+    }
+
+    // Flush outbox every 10 seconds while page is open
+    setInterval(flushOutbox, 10000);
+
+    // Also flush immediately when browser detects internet is back
+    window.addEventListener('online', () => {
+      showAlert('🌐 Internet connection restored! Syncing offline transactions to cloud...', 'success');
+      setTimeout(flushOutbox, 1500);
+    });
+
+    window.addEventListener('offline', () => {
+      showAlert('📡 Internet disconnected. Transactions will queue locally and sync automatically when back online.', 'warning');
+    });
+
+    function updateOutboxBadge() {
+      const badge = document.getElementById('offlineOutboxBadge');
+      if (!badge) return;
+      if (cloudOutbox.length > 0) {
+        badge.textContent = `⏳ ${cloudOutbox.length} pending cloud sync${cloudOutbox.length > 1 ? 's' : ''}`;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    const DEFAULT_INVENTORY = [
+      { id: 1,  code: "TPDDL-MTR-01", name: "LTCT Meter (Single Phase)", opening: 500, issued: 180, low: 25, high: 60, d1: 20, d2: 18, d3: 16, lastUpdated: "18.10.2026, 12:15 PM" },
+      { id: 2,  code: "TPDDL-MTR-02", name: "PP WC Meter (Poly Phase)",  opening: 300, issued: 12,  low: 20, high: 50, d1: 11, d2: 10, d3: 9,  lastUpdated: "18.10.2026, 10:45 AM" },
+      { id: 3,  code: "TPDDL-MTR-03", name: "HT Meter (High Tension)",   opening: 150, issued: 152, low: 15, high: 35, d1: 6,  d2: 5,  d3: 4,  lastUpdated: "18.10.2026, 11:30 AM" },
+      { id: 4,  code: "TPDDL-MTR-04", name: "Net Meter (Solar Rooftop)", opening: 400, issued: 247, low: 30, high: 70, d1: 16, d2: 14, d3: 13, lastUpdated: "18.10.2026, 12:12 PM" },
+      { id: 5,  code: "TPDDL-MTR-05", name: "Prepaid Smart Meter",       opening: 250, issued: 215, low: 20, high: 50, d1: 24, d2: 21, d3: 20, lastUpdated: "18.10.2026, 09:40 AM" },
+      { id: 6,  code: "TPDDL-MTR-06", name: "CT Ratio Meter",            opening: 180, issued: 88,  low: 20, high: 45, d1: 10, d2: 9,  d3: 8,  lastUpdated: "17.10.2026, 05:30 PM" },
+      { id: 7,  code: "TPDDL-MTR-07", name: "Smart Grid AMI Meter",      opening: 600, issued: 310, low: 40, high: 90, d1: 30, d2: 28, d3: 26, lastUpdated: "18.10.2026, 09:15 AM" },
+      { id: 8,  code: "TPDDL-MTR-08", name: "Whole Current Meter",       opening: 350, issued: 140, low: 25, high: 60, d1: 15, d2: 14, d3: 13, lastUpdated: "17.10.2026, 04:50 PM" },
+      { id: 9,  code: "TPDDL-MTR-09", name: "Energy Meter 1-Phase",      opening: 800, issued: 420, low: 50, high: 120, d1: 45, d2: 40, d3: 38, lastUpdated: "18.10.2026, 08:30 AM" },
+      { id: 10, code: "TPDDL-MTR-10", name: "Energy Meter 3-Phase",      opening: 450, issued: 210, low: 30, high: 75, d1: 22, d2: 20, d3: 19, lastUpdated: "17.10.2026, 03:20 PM" }
+    ];
+
+    // Load initial pending queue from localStorage or default
+    let pendingQueue = [
+      {
+        reqId: "REQ-20261018-104512",
+        time: "18-Oct-2026 10:45 AM",
+        type: "ISSUE",
+        meter: "HT Meter (High Tension)",
+        qty: 10,
+        staff: "P. K. Verma (JE-8491)",
+        site: "Pitampura 66kV Grid",
+        remarks: "Line augment"
+      },
+      {
+        reqId: "REQ-20261018-111005",
+        time: "18-Oct-2026 11:10 AM",
+        type: "ISSUE",
+        meter: "Net Meter (Solar Rooftop)",
+        qty: 25,
+        staff: "R. K. Sharma (AE-1022)",
+        site: "Civil Lines Feeder 4",
+        remarks: "PM Surya Ghar Yojana"
+      }
+    ];
+
+    try {
+      const savedPending = localStorage.getItem('tpddl_pending_queue');
+      if (savedPending) pendingQueue = JSON.parse(savedPending);
+    } catch (e) {}
+
+    // Audit Log History
+    let auditLog = [
+      { time: "18-Oct-2026 09:30 AM", reqId: "REQ-20261018-093011", meter: "LTCT Meter", qty: 30, staff: "A. Gupta", status: "APPROVED", manager: "Store Manager (Auth-999)" },
+      { time: "17-Oct-2026 04:15 PM", reqId: "REQ-20261017-161522", meter: "Prepaid Smart Meter", qty: 50, staff: "V. Mehra", status: "APPROVED", manager: "Store Manager (Auth-999)" },
+      { time: "17-Oct-2026 02:00 PM", reqId: "REQ-20261017-140001", meter: "HT Meter", qty: 40, staff: "P. K. Verma", status: "REJECTED", manager: "Store Manager (Auth-999)" }
+    ];
+
+    try {
+      const savedAudit = localStorage.getItem('tpddl_audit_log');
+      if (savedAudit) auditLog = JSON.parse(savedAudit);
+    } catch (e) {}
+
+    // Auto-save Cloud API URL from QR code parameter (?cloud=...)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cloudParam = urlParams.get('cloud');
+      if (cloudParam && cloudParam.trim().length > 15) {
+        localStorage.setItem('tpddl_sheets_api_url', cloudParam.trim());
+      }
+    } catch (e) {}
+
+    // Pull from backend bridge if active
+    async function syncFromBridgeServer() {
+      try {
+        const resPending = await fetch(`${API_BRIDGE_URL}/portal/pending`, { cache: 'no-store' });
+        if (resPending.ok) {
+          const data = await resPending.json();
+          if (Array.isArray(data.pending) && data.pending.length > 0) {
+            pendingQueue = data.pending;
+            updatePendingBadge();
+            if (isManagerUnlocked) renderPendingQueue();
+          }
+        }
+        const resAudit = await fetch(`${API_BRIDGE_URL}/portal/audit`, { cache: 'no-store' });
+        if (resAudit.ok) {
+          const data = await resAudit.json();
+          if (Array.isArray(data.audit) && data.audit.length > 0) {
+            auditLog = data.audit;
+          }
+        }
+      } catch (err) {}
+    }
+    syncFromBridgeServer();
+
+    // =========================================================================
+    // TABS
+    // =========================================================================
+    function switchPortalTab(tabId) {
+      document.querySelectorAll('.portal-card').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+
+      if (tabId === 'tabApproval' && isManagerUnlocked) {
+        renderPendingQueue();
+      }
+      if (tabId === 'tabAudit') {
+        renderAuditTable();
+      }
+    }
+
+    // =========================================================================
+    // LEVEL 1: STORE STAFF SUBMISSION
+    // =========================================================================
+    async function handleStaffSubmit(e) {
+      e.preventDefault();
+
+      const type = document.getElementById('entryType').value;
+      const meter = document.getElementById('entryMeter').value;
+      const qty = parseInt(document.getElementById('entryQty').value);
+      const slip = document.getElementById('entrySlip').value;
+      const site = document.getElementById('entrySite').value;
+      const staff = document.getElementById('entryStaff').value;
+      const remarks = document.getElementById('entryRemarks').value;
+
+      const now = new Date();
+      const nowStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + " " +
+                     now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      const newReq = {
+        reqId: "REQ-" + Date.now().toString().slice(-8),
+        time: nowStr,
+        type: type,
+        meter: meter,
+        qty: qty,
+        staff: staff,
+        site: site + " (" + slip + ")",
+        remarks: remarks
+      };
+
+      pendingQueue.unshift(newReq);
+      try {
+        localStorage.setItem('tpddl_pending_queue', JSON.stringify(pendingQueue));
+      } catch (e) {}
+      updatePendingBadge();
+
+      // Submit to backend bridge
+      try {
+        fetch(`${API_BRIDGE_URL}/portal/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newReq)
+        });
+      } catch (e) {}
+
+      // Dispatch to Google Sheets Cloud (offline-resilient outbox queue)
+      enqueueToCloud({
+        action: "SUBMIT_REQUISITION",
+        reqId: newReq.reqId,
+        meter: newReq.meter,
+        qty: newReq.qty,
+        type: newReq.type,
+        staff: newReq.staff,
+        site: newReq.site,
+        remarks: newReq.remarks
+      });
+
+      showAlert(`✅ Request ${newReq.reqId} submitted successfully! Placed in Manager Approval Queue. Main display will update as soon as manager approves.`, 'success');
+
+      document.getElementById('stockEntryForm').reset();
+    }
+
+    function showAlert(msg, type) {
+      const box = document.getElementById('alertBox');
+      box.className = 'alert-box alert-' + type;
+      box.textContent = msg;
+      box.style.display = 'block';
+      setTimeout(() => { box.style.display = 'none'; }, 7000);
+    }
+
+    function updatePendingBadge() {
+      document.getElementById('pendingCountBadge').textContent = pendingQueue.length;
+    }
+
+    // =========================================================================
+    // LEVEL 2: MANAGER APPROVAL LOGIC (COMMITS TO DISPLAY)
+    // =========================================================================
+    function unlockManagerPanel() {
+      const pin = document.getElementById('mgrPinInput').value;
+      if (pin === MANAGER_PIN) {
+        isManagerUnlocked = true;
+        document.getElementById('managerLockBox').style.display = 'none';
+        document.getElementById('managerQueueBox').style.display = 'block';
+        document.getElementById('mgrPinErr').style.display = 'none';
+        renderPendingQueue();
+      } else {
+        document.getElementById('mgrPinErr').style.display = 'block';
+      }
+    }
+
+    function lockManagerPanel() {
+      isManagerUnlocked = false;
+      document.getElementById('mgrPinInput').value = '';
+      document.getElementById('managerLockBox').style.display = 'block';
+      document.getElementById('managerQueueBox').style.display = 'none';
+    }
+
+    function renderPendingQueue() {
+      const container = document.getElementById('pendingListContainer');
+      container.innerHTML = "";
+
+      if (pendingQueue.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: var(--text-muted); padding: 30px;">✓ All clear! No pending authorizations in queue.</p>`;
+        return;
+      }
+
+      pendingQueue.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'pending-item';
+        div.innerHTML = `
+          <div class="pending-top">
+            <span class="req-tag">${item.reqId}</span>
+            <span style="font-size: 11px; color: var(--text-muted);">${item.time}</span>
+          </div>
+          <div class="pending-meta">
+            Meter: <b>${item.meter}</b><br>
+            Quantity: <b style="color: var(--tp-blue); font-size: 15px;">${item.qty} units</b> (${item.type})<br>
+            Destination: <b>${item.site}</b><br>
+            Requested by: <b>${item.staff}</b> • <i>${item.remarks || 'No remarks'}</i>
+          </div>
+          <div class="pending-actions">
+            <button class="btn-approve" onclick="authorizeRequest(${idx}, 'APPROVED')">✓ Approve & Reflect on Display Instantly</button>
+            <button class="btn-reject" onclick="authorizeRequest(${idx}, 'REJECTED')">✕ Reject</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    async function authorizeRequest(index, decision) {
+      const item = pendingQueue[index];
+      if (!item) return;
+
+      const now = new Date();
+      const nowStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) + " " +
+                     now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+      // Add to permanent audit log
+      const auditEntry = {
+        time: nowStr,
+        reqId: item.reqId,
+        type: (item.type === 'INWARD') ? 'INWARD' : 'OUTWARD',
+        meter: item.meter,
+        qty: item.qty,
+        staff: item.staff,
+        status: decision,
+        manager: "Store Manager (Auth-999)"
+      };
+      auditLog.unshift(auditEntry);
+      try {
+        localStorage.setItem('tpddl_audit_log', JSON.stringify(auditLog));
+      } catch (e) {}
+
+      // Remove from pending queue
+      pendingQueue.splice(index, 1);
+      try {
+        localStorage.setItem('tpddl_pending_queue', JSON.stringify(pendingQueue));
+      } catch (e) {}
+
+      updatePendingBadge();
+      renderPendingQueue();
+
+      if (decision === 'APPROVED') {
+        // 1. UPDATE LOCAL STORAGE INVENTORY
+        let inventory = DEFAULT_INVENTORY;
+        try {
+          const stored = localStorage.getItem('tpddl_inventory_data');
+          if (stored) inventory = JSON.parse(stored);
+        } catch (e) {}
+
+        const now = new Date();
+        const datePart = now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const timePart = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const nowStamp = `${datePart}, ${timePart}`;
+
+        const targetMeterName = item.meter.toLowerCase();
+        let matched = false;
+        for (let row of inventory) {
+          if (row.name.toLowerCase().includes(targetMeterName) || targetMeterName.includes(row.name.toLowerCase()) || targetMeterName.includes(row.code.toLowerCase())) {
+            if (item.type === 'ISSUE') {
+              row.issued += item.qty;
+            } else {
+              row.opening += item.qty;
+            }
+            row.lastUpdated = nowStamp;
+            matched = true;
+            break;
+          }
+        }
+
+        try {
+          localStorage.setItem('tpddl_inventory_data', JSON.stringify(inventory));
+          localStorage.setItem('tpddl_last_updated', Date.now().toString());
+        } catch (e) {}
+
+        // 2. BROADCAST INSTANT MESSAGE TO OPEN MONITOR DASHBOARDS (0ms Reflection)
+        syncChannel.postMessage({
+          type: 'STOCK_UPDATED',
+          meter: item.meter,
+          qty: item.qty,
+          entryType: item.type,
+          updatedInventory: inventory
+        });
+
+        // 3. SEND TO PYTHON BRIDGE SERVER (Persistent on disk)
+        try {
+          const res = await fetch(`${API_BRIDGE_URL}/portal/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              reqId: item.reqId,
+              index: index,
+              decision: 'APPROVED',
+              meter: item.meter,
+              qty: item.qty,
+              type: item.type,
+              staff: item.staff
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.inventory) {
+              inventory = data.inventory;
+              localStorage.setItem('tpddl_inventory_data', JSON.stringify(inventory));
+              syncChannel.postMessage({
+                type: 'STOCK_UPDATED',
+                meter: item.meter,
+                qty: item.qty,
+                entryType: item.type,
+                updatedInventory: inventory
+              });
+            }
+          }
+        } catch (e) {
+          console.warn("Bridge server approve error:", e);
+        }
+
+        // 4. CLOUD GOOGLE SHEETS DISPATCH (Offline-Resilient Outbox Queue)
+        enqueueToCloud({
+          action: "APPROVE_TRANSACTION",
+          reqId: item.reqId,
+          meter: item.meter,
+          qty: item.qty,
+          type: item.type,
+          staff: item.staff
+        });
+
+        showAlert(`🎉 ${item.reqId} APPROVED! Stock updated (${item.type === 'ISSUE' ? '-' : '+'}${item.qty} units) and committed to AOC Display instantly!`, 'success');
+      } else {
+        // Send rejection to server
+        try {
+          fetch(`${API_BRIDGE_URL}/portal/approve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reqId: item.reqId, index: index, decision: 'REJECTED', meter: item.meter, qty: item.qty, type: item.type, staff: item.staff })
+          });
+        } catch (e) {}
+
+        enqueueToCloud({
+          action: "REJECT_TRANSACTION",
+          reqId: item.reqId,
+          meter: item.meter,
+          qty: item.qty,
+          type: item.type,
+          staff: item.staff
+        });
+
+        showAlert(`⚠️ ${item.reqId} REJECTED. Logged in audit history. Display unaffected.`, 'error');
+      }
+    }
+
+    // =========================================================================
+    // AUDIT LOG & INTERACTIVE FILTER ENGINE
+    // =========================================================================
+    function filterAuditLogs() {
+      renderAuditTable();
+    }
+
+    function renderAuditTable() {
+      const tbody = document.getElementById('auditLogTbody');
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      const q = (document.getElementById('auditSearchInput')?.value || '').trim().toLowerCase();
+      const typeFilter = document.getElementById('auditTypeFilter')?.value || 'ALL';
+      const statusFilter = document.getElementById('auditStatusFilter')?.value || 'ALL';
+      const meterFilter = document.getElementById('auditMeterFilter')?.value || 'ALL';
+
+      const filtered = auditLog.filter(row => {
+        // Direction / Type filter
+        const rowType = (row.type || 'OUTWARD').toUpperCase();
+        if (typeFilter !== 'ALL' && rowType !== typeFilter) return false;
+
+        // Status filter
+        const rowStatus = (row.status || 'APPROVED').toUpperCase();
+        if (statusFilter !== 'ALL' && rowStatus !== statusFilter) return false;
+
+        // Meter filter
+        if (meterFilter !== 'ALL') {
+          if (!row.meter.toLowerCase().includes(meterFilter.toLowerCase())) return false;
+        }
+
+        // Search text
+        if (q) {
+          const matchStr = `${row.reqId} ${row.meter} ${row.staff} ${row.time} ${rowType} ${rowStatus}`.toLowerCase();
+          if (!matchStr.includes(q)) return false;
+        }
+
+        return true;
+      });
+
+      const countBadge = document.getElementById('auditCountBadge');
+      if (countBadge) {
+        countBadge.textContent = `Showing ${filtered.length} of ${auditLog.length} logs`;
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 25px;">No audit records found matching your filters.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(row => {
+        const tr = document.createElement('tr');
+        const isApproved = (row.status === 'APPROVED');
+        const statClass = isApproved ? 'badge-status-approved' : 'badge-status-rejected';
+        const isOutward = ((row.type || 'OUTWARD').toUpperCase() === 'OUTWARD');
+        const dirBadge = isOutward
+          ? `<span class="badge-outward"><svg style="width:11px;height:11px;fill:currentColor;" viewBox="0 0 24 24"><path d="M5 4h14v2H5zm0 10h4v6h6v-6h4l-7-7-7 7z"/></svg> 📤 OUTWARD (Issue)</span>`
+          : `<span class="badge-inward"><svg style="width:11px;height:11px;fill:currentColor;" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg> 📥 INWARD (Receipt)</span>`;
+
+        tr.innerHTML = `
+          <td>${row.time}</td>
+          <td style="font-family: monospace; font-weight: 700; color: var(--tp-light-blue);">${row.reqId}</td>
+          <td>${dirBadge}</td>
+          <td><b>${row.meter}</b></td>
+          <td><b style="font-size: 14px; color: ${isOutward ? 'var(--tp-blue)' : '#2e7d32'};">${row.qty}</b></td>
+          <td>${row.staff}</td>
+          <td><span class="${statClass}">${row.status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    updatePendingBadge();
+    renderAuditTable();
+    updateOutboxBadge();
+  </script>
+</body>
+</html>

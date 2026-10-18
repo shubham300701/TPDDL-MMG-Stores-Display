@@ -1,0 +1,82 @@
+[
+  {
+    "time": "18-Oct-2026 12:18 PM",
+    "reqId": "REQ-20261018-111005",
+    "type": "OUTWARD",
+    "meter": "Net Meter (Solar Rooftop)",
+    "qty": 25,
+    "staff": "R. K. Sharma (AE-1022)",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 12:09 PM",
+    "reqId": "REQ-05557166",
+    "type": "OUTWARD",
+    "meter": "LTCT Meter (Single Phase)",
+    "qty": 20,
+    "staff": "Aman 7455",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 12:08 PM",
+    "reqId": "REQ-05476562",
+    "type": "OUTWARD",
+    "meter": "LTCT Meter (Single Phase)",
+    "qty": 50,
+    "staff": "Yash 45851",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 12:02 PM",
+    "reqId": "REQ-05131069",
+    "type": "OUTWARD",
+    "meter": "LTCT Meter (Single Phase)",
+    "qty": 30,
+    "staff": "Ramesh",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 11:53 AM",
+    "reqId": "REQ-20261018-111005",
+    "type": "OUTWARD",
+    "meter": "Net Meter (Solar Rooftop)",
+    "qty": 25,
+    "staff": "R. K. Sharma (AE-1022)",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 11:53 AM",
+    "reqId": "REQ-20261018-104512",
+    "type": "OUTWARD",
+    "meter": "HT Meter (High Tension)",
+    "qty": 10,
+    "staff": "P. K. Verma (JE-8491)",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 11:53 AM",
+    "reqId": "REQ-04615977",
+    "type": "OUTWARD",
+    "meter": "LTCT Meter (Single Phase)",
+    "qty": 25,
+    "staff": "Rajesh RN-112739",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  },
+  {
+    "time": "18-Oct-2026 09:30 AM",
+    "reqId": "REQ-20261018-093011",
+    "type": "INWARD",
+    "meter": "Smart Grid AMI Meter",
+    "qty": 100,
+    "staff": "Central Vendor Consignment",
+    "status": "APPROVED",
+    "manager": "Store Manager (Auth-999)"
+  }
+]

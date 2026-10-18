@@ -1,0 +1,2315 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TATA POWER-DDL | MMG - STORES (KPM) Real-Time Inventory & Predictive Demand</title>
+  
+  <!-- Modern Clean Enterprise & Technical Utility Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================================
+       THEME VARIABLES (PERMANENT LIGHT ENTERPRISE UTILITY MODE)
+       ========================================================================= */
+    :root, :root[data-theme="light"] {
+      --tp-blue: #004890;
+      --tp-light-blue: #005bb5;
+      --bg-dark: #f0f4f9;
+      --card-bg: #ffffff;
+      --header-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --accent-yellow: #b45309;
+      --accent-cyan: #0284c7;
+      --status-ok: #15803d;
+      --status-mid: #b45309;
+      --status-low: #b91c1c;
+      --row-hover: #e0edfd;
+      --row-band-tint: #f1f6fc;
+      --row-border: #cbd5e1;
+      --forecast-purple: #6d28d9;
+      --logo-badge-bg: #ffffff;
+      --table-header-bg: #e2e8f0;
+      --kpi-bg: #f8fafc;
+      --pred-box-bg: #f1f5f9;
+      --modal-bg: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    body {
+      font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+      font-weight: 600;
+      letter-spacing: 0.35px;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 10px 18px;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* TOP HEADER */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--header-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 18px;
+      margin-bottom: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      flex-shrink: 0;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .tata-logo-badge {
+      background: var(--logo-badge-bg);
+      padding: 3px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 44px;
+      border: 1px solid rgba(0, 72, 144, 0.15);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .tata-logo-badge img {
+      max-height: 38px;
+      width: auto;
+      object-fit: contain;
+      image-rendering: -webkit-optimize-contrast;
+    }
+
+    .brand-text h1 {
+      font-size: 21px;
+      font-weight: 900;
+      letter-spacing: 1.1px;
+      color: var(--tp-blue);
+      text-transform: uppercase;
+      line-height: 1.1;
+    }
+
+
+    .brand-text .sub-title {
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .ctrl-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      padding: 5px 12px;
+      border-radius: 18px;
+      font-size: 12px;
+      color: var(--text-main);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ctrl-pill:hover {
+      border-color: var(--tp-light-blue);
+      transform: translateY(-1px);
+    }
+
+    .ctrl-pill svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+    }
+
+    .clock-pill {
+      background: rgba(0, 114, 206, 0.08);
+      border-color: var(--tp-light-blue);
+      color: var(--tp-light-blue);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 4px 14px;
+      border-radius: 8px;
+    }
+
+    .clock-stack {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      line-height: 1.15;
+    }
+
+    .live-clock-time {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--tp-blue);
+    }
+
+    .live-clock-date {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* =========================================================================
+       PURE 24/7 STORE MONITOR KIOSK MODE (?kiosk=1)
+       Hides all interactive buttons, links, and modals so only pure store data displays
+       ========================================================================= */
+    body.kiosk-mode #mobileQrHeaderBtn,
+    body.kiosk-mode #cloudSyncHeaderBtn,
+    body.kiosk-mode #wifiHeaderBtn,
+    body.kiosk-mode .modal-backdrop {
+      display: none !important;
+    }
+
+    body.kiosk-mode header {
+      padding: 10px 24px;
+    }
+
+    body.kiosk-mode .brand-text h1 {
+      font-size: 25px;
+      letter-spacing: 1.4px;
+    }
+
+    body.kiosk-mode .live-clock-time {
+      font-size: 18px;
+    }
+
+    body.kiosk-mode .clock-pill {
+      padding: 6px 18px;
+      border-radius: 20px;
+    }
+
+    body.kiosk-mode table th {
+      font-size: 13.5px;
+      padding: 11px 12px;
+    }
+
+    body.kiosk-mode table td {
+      font-size: 14.5px;
+      padding: 10px 12px;
+    }
+
+    body.kiosk-mode .table-container::-webkit-scrollbar {
+      display: none;
+    }
+    body.kiosk-mode .table-container {
+      scrollbar-width: none;
+    }
+
+    /* TABLE CONTAINER */
+    .table-container {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    .table-container::-webkit-scrollbar-track {
+      background: var(--card-bg);
+    }
+    .table-container::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 3px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background: var(--table-header-bg);
+      z-index: 10;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    th {
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--tp-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      border-bottom: 2px solid #94a3b8;
+      background: var(--table-header-bg);
+    }
+
+
+    .th-sub {
+      display: block;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: none;
+      letter-spacing: 0;
+      margin-top: 1px;
+    }
+
+    th.num, td.num {
+      text-align: right;
+    }
+
+    tbody tr {
+      border-bottom: 2px solid var(--row-border);
+      cursor: pointer;
+      transition: background-color 0.12s ease;
+      height: 52px;
+    }
+
+    /* TINTED BANDED ROWS FOR CRISP DISTANT VISIBILITY */
+    tbody tr:nth-child(odd) {
+      background-color: #ffffff;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--row-band-tint); /* Crisp soft blue tint */
+    }
+
+    tbody tr:hover, tbody tr.focused {
+      background-color: var(--row-hover) !important;
+      outline: 2px solid var(--tp-blue);
+      outline-offset: -1px;
+    }
+
+    @keyframes rowUpdatePulse {
+      0% { background-color: rgba(21, 128, 61, 0.45) !important; }
+      50% { background-color: rgba(2, 132, 199, 0.3) !important; }
+      100% { background-color: transparent; }
+    }
+    .row-updated-flash {
+      animation: rowUpdatePulse 2.8s ease-out;
+    }
+
+    td {
+      padding: 7px 12px;
+      font-size: 15px;
+      font-weight: 600;
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+
+    .key-badge {
+      display: inline-block;
+      background: #e2e8f0;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 6px;
+      color: var(--tp-blue);
+      font-family: 'Rajdhani', monospace;
+    }
+
+    .item-title-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .item-name {
+      color: var(--text-main);
+      font-size: 15px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+
+    .item-sync-meta {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .item-sync-meta .code-tag {
+      background: rgba(0, 114, 206, 0.08);
+      color: var(--tp-light-blue);
+      padding: 0 4px;
+      border-radius: 3px;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .row-last-updated {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .update-time-highlight {
+      color: var(--tp-light-blue);
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+
+    .stock-badge {
+      display: inline-block;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 6px;
+      min-width: 68px;
+      text-align: center;
+    }
+
+    .stock-ok {
+      color: #15803d;
+      background: #dcfce7;
+      border: 1.5px solid #86efac;
+    }
+
+    .stock-mid {
+      color: #b45309;
+      background: #fef3c7;
+      border: 1.5px solid #fcd34d;
+    }
+
+    .stock-low {
+      color: #b91c1c;
+      background: #fee2e2;
+      border: 1.5px solid #fca5a5;
+      animation: blinkAlert 1s infinite alternate;
+    }
+
+    @keyframes blinkAlert {
+      from { opacity: 1; }
+      to { opacity: 0.35; }
+    }
+
+    .status-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 4px 9px;
+      border-radius: 5px;
+      min-width: 98px;
+      letter-spacing: 0.3px;
+    }
+
+    /* STRAIGHT HORIZONTAL PREDICTION COLUMN */
+    .prediction-container {
+      display: grid;
+      grid-template-columns: 88px 185px;
+      gap: 12px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .pred-number-box {
+      display: inline-flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 4px;
+      background: var(--pred-box-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 8px;
+      height: 32px;
+      box-sizing: border-box;
+      white-space: nowrap;
+    }
+
+    .pred-number {
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--forecast-purple);
+      line-height: 1;
+    }
+
+    .pred-unit {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .pred-details-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 2px;
+      white-space: nowrap;
+    }
+
+    .pred-badge {
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .pred-safe {
+      background: rgba(0, 230, 118, 0.14);
+      color: var(--status-ok);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+    }
+
+    .pred-warn {
+      background: rgba(255, 171, 0, 0.14);
+      color: var(--status-mid);
+      border: 1px solid rgba(255, 171, 0, 0.3);
+    }
+
+    .pred-danger {
+      background: rgba(255, 23, 68, 0.18);
+      color: var(--status-low);
+      border: 1px solid rgba(255, 23, 68, 0.5);
+      animation: blinkAlert 1s infinite alternate;
+    }
+
+    .pred-mini-split {
+      font-size: 9.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    /* FOOTER */
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 18px;
+      margin-top: 6px;
+      background: var(--header-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .footer-sync-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .footer-sync-indicator svg {
+      width: 13px;
+      height: 13px;
+      fill: var(--status-ok);
+    }
+
+    .total-stock-count {
+      font-size: 19px;
+      color: var(--tp-blue);
+      font-weight: 900;
+      margin-left: 6px;
+    }
+
+
+    /* =========================================================================
+       MODALS: ANALYTICS & INTERACTIVE WIFI NETWORK MANAGER
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .modal-window {
+      background: var(--modal-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 980px;
+      max-height: 94vh;
+      overflow-y: auto;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .modal-title-area h2 {
+      font-size: 18px;
+      color: var(--text-main);
+      font-weight: 800;
+    }
+
+    .close-modal-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal-btn:hover {
+      background: var(--status-low);
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* KPI ROW */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .kpi-card {
+      background: var(--kpi-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+
+    .kpi-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .forecast-banner {
+      background: rgba(124, 58, 237, 0.08);
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .forecast-days {
+      display: flex;
+      gap: 12px;
+    }
+
+    .forecast-day-box {
+      background: var(--kpi-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 5px 10px;
+      text-align: center;
+      min-width: 75px;
+    }
+
+    .forecast-day-box .day-title {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .forecast-day-box .day-qty {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--forecast-purple);
+    }
+
+    .forecast-recommendation {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      max-width: 520px;
+    }
+
+    .chart-container {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+
+    .chart-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--kpi-bg);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--tp-blue);
+      color: #fff;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: flex-end;
+      gap: 16px;
+      margin-bottom: 6px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    canvas#trendCanvas {
+      width: 100%;
+      height: 200px;
+      display: block;
+    }
+
+    /* =========================================================================
+       INTERACTIVE WIFI NETWORK MANAGER STYLES
+       ========================================================================= */
+    .wifi-modal-window {
+      max-width: 540px;
+    }
+
+    .wifi-status-card {
+      background: var(--kpi-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wifi-current-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wifi-signal-icon {
+      width: 32px;
+      height: 32px;
+      background: rgba(0, 230, 118, 0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--status-ok);
+    }
+
+    .wifi-signal-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .network-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+    }
+
+    .network-list-header h3 {
+      font-size: 12px;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .scan-btn {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--tp-light-blue);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .scan-btn:hover {
+      background: rgba(0, 114, 206, 0.1);
+    }
+
+    .network-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 230px;
+      overflow-y: auto;
+    }
+
+    .network-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background: var(--bg-dark);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .network-item:hover {
+      border-color: var(--tp-light-blue);
+      background: var(--row-hover);
+    }
+
+    .network-item.connected {
+      border-color: var(--status-ok);
+      background: rgba(0, 230, 118, 0.05);
+    }
+
+    .net-name-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .net-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .net-sec-badge {
+      font-size: 10px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .net-meta-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* PASSWORD ENTRY DIALOG */
+    .wifi-connect-box {
+      background: var(--kpi-bg);
+      border: 1px solid var(--tp-light-blue);
+      border-radius: 8px;
+      padding: 14px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .wifi-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .wifi-input-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .wifi-input-group input {
+      padding: 8px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--bg-dark);
+      color: var(--text-main);
+      outline: none;
+    }
+
+    .wifi-input-group input:focus {
+      border-color: var(--tp-blue);
+    }
+
+    .wifi-btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-connect {
+      background: var(--tp-blue);
+      color: #fff;
+      border: none;
+      padding: 7px 16px;
+      font-size: 12px;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-disconnect {
+      background: transparent;
+      border: 1px solid var(--status-low);
+      color: var(--status-low);
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-cancel-connect {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <!-- INSTANT LIVE SYNC NOTIFICATION TOAST -->
+  <div id="liveSyncToast" style="display: none; position: fixed; top: 18px; right: 24px; z-index: 99999; background: #00e676; color: #070b13; font-weight: 800; font-size: 13px; padding: 10px 18px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 230, 118, 0.4); display: none; align-items: center; gap: 8px; border: 1px solid #ffffff;">
+    <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+    <span id="liveSyncToastMsg">⚡ Stock Updated Instantly</span>
+  </div>
+
+  <!-- OFFLINE OUTBOX FLOATING BADGE (Visible when portal has queued transactions) -->
+  <div id="dashboardOutboxBadge" style="display: none; position: fixed; bottom: 18px; right: 24px; z-index: 99999; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; font-weight: 800; font-size: 13px; padding: 10px 22px; border-radius: 30px; box-shadow: 0 6px 24px rgba(217, 119, 6, 0.45); animation: pulseOutboxDash 1.8s ease-in-out infinite; letter-spacing: 0.3px;">
+    ⏳ 0 pending cloud syncs
+  </div>
+
+  <!-- OFFLINE CONNECTIVITY STATUS BAR -->
+  <div id="offlineBar" style="display: none; position: fixed; top: 0; left: 0; right: 0; z-index: 999999; background: linear-gradient(90deg, #dc2626, #b91c1c); color: #fff; font-weight: 800; font-size: 13px; padding: 8px 18px; text-align: center; box-shadow: 0 3px 16px rgba(185,28,28,0.35); letter-spacing: 0.3px;">
+    📡 OFFLINE — Display is running on cached data. Transactions will auto-sync when internet reconnects.
+  </div>
+
+  <style>
+    @keyframes pulseOutboxDash {
+      0%, 100% { box-shadow: 0 6px 24px rgba(217,119,6,0.45); }
+      50% { box-shadow: 0 6px 36px rgba(217,119,6,0.75); }
+    }
+  </style>
+
+  <!-- TOP HEADER -->
+  <header>
+    <div class="brand-section">
+      <div class="tata-logo-badge" title="Tata Power Delhi Distribution Limited">
+        <img src="tata_power_ddl_logo_clean.png" alt="TATA POWER-DDL" onerror="this.src='tata_power_ddl_logo.png'">
+      </div>
+      <div class="brand-text">
+        <h1>MMG - STORES (KPM)</h1>
+        <div class="sub-title">Material Management Group • Keshavpuram Meter Store • Real-Time Inventory & Forecasting</div>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- MOBILE PHONE ENTRY & QR PILL -->
+      <button class="ctrl-pill" id="mobileQrHeaderBtn" onclick="openQrModal()" title="Scan QR Code to open Store Entry Portal on Mobile Phone">
+        <svg style="width: 14px; height: 14px; fill: var(--tp-blue);" viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+        <span>📱 Mobile Entry</span>
+      </button>
+
+      <!-- GOOGLE SHEETS CLOUD SYNC PILL -->
+      <button class="ctrl-pill" id="cloudSyncHeaderBtn" onclick="openCloudModal()" title="Google Sheets Cloud Database Sync Status">
+        <svg style="width: 14px; height: 14px; fill: var(--tp-blue);" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+        <span id="cloudSyncLabel">☁️ Cloud Database</span>
+      </button>
+
+      <!-- CLICKABLE INTERACTIVE WIFI STATUS BUTTON -->
+      <button class="ctrl-pill" id="wifiHeaderBtn" onclick="openWifiModal()" title="Click to view & connect WiFi networks">
+        <svg id="headerWifiIcon" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.55 0 6.78 1.41 9.17 3.7L12 19.3 2.83 11.2C5.22 8.91 8.45 7.5 12 7.5z"/></svg>
+        <span id="headerWifiSsid" style="color: var(--status-ok);">TP-DOMAIN</span>
+      </button>
+
+      <!-- DIGITAL CLOCK (IST - TIME ON TOP, DATE BELOW) -->
+      <div class="ctrl-pill clock-pill" title="Indian Standard Time (IST)">
+        <svg style="width: 16px; height: 16px; fill: currentColor; flex-shrink: 0;" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+        <div class="clock-stack">
+          <span id="liveClockTime" class="live-clock-time">--:--:-- --</span>
+          <span id="liveClockDate" class="live-clock-date">---, -- --- ----</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- TABLE CONTAINER (WITH STRAIGHT HORIZONTAL GRID ALIGNMENT) -->
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 40px;">#</th>
+          <th>Meter Type / Description</th>
+          <th class="num" style="width: 170px;">
+            Opening Stock
+            <span class="th-sub">(as of 17.10.2026)</span>
+          </th>
+          <th class="num" style="width: 170px;">
+            Total Issued
+            <span class="th-sub">(as of today, 18.10.2026)</span>
+          </th>
+          <th class="num" style="width: 155px;">Available in Store</th>
+          <th style="width: 140px; text-align: center;">Stock Status</th>
+          <th class="num" style="width: 295px;">
+            Predicted 3-Day Demand
+            <span class="th-sub">(19 Oct to 21 Oct)</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody id="inventoryTableBody">
+        <!-- Rendered dynamically -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MINIMAL FOOTER: ONLY LAST SYNC AND AVAILABLE METERS -->
+  <footer>
+    <div class="footer-sync-indicator">
+      <svg viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+      <span id="lastSyncedText">Last Synced on: 18-Oct-2026, 11:25:00 AM</span>
+    </div>
+
+    <div>
+      <span style="font-size: 14px; font-weight: 700;">Available Meters:</span>
+      <span id="totalStockCount" class="total-stock-count">0</span>
+    </div>
+  </footer>
+
+  <!-- =========================================================================
+       MODAL 1: INTERACTIVE WIFI NETWORK MANAGER
+       ========================================================================= -->
+  <div id="wifiModal" class="modal-backdrop">
+    <div class="modal-window wifi-modal-window">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <svg style="width: 20px; height: 20px; fill: var(--status-ok);" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.55 0 6.78 1.41 9.17 3.7L12 19.3 2.83 11.2C5.22 8.91 8.45 7.5 12 7.5z"/></svg>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h2>WiFi & Network Settings</h2>
+              <span id="hwBridgeBadge" style="font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: rgba(0, 230, 118, 0.15); color: var(--status-ok); border: 1px solid rgba(0, 230, 118, 0.3);">🟢 Real Hardware Wi-Fi</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted);">Manage Physical Adapter & Store Wireless Connections</div>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="closeWifiModal()" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- HARDWARE BRIDGE STATUS BANNER -->
+        <div id="hwBridgeNotice" style="display: none; background: rgba(255, 171, 0, 0.12); border: 1px solid rgba(255, 171, 0, 0.3); padding: 8px 12px; border-radius: 6px; font-size: 11px; color: var(--status-mid);">
+          ⚠️ <b>Hardware Bridge Service Not Detected:</b> To scan live physical Wi-Fi signals nearby, start <code>start_display_with_wifi.bat</code> (or run <code>python wifi_bridge.py</code>). Currently showing cached/test networks.
+        </div>
+
+        <!-- CURRENT STATUS CARD -->
+        <div class="wifi-status-card" id="currentWifiCard">
+          <div class="wifi-current-info">
+            <div class="wifi-signal-icon" id="wifiStatusIconBox">
+              <svg viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.55 0 6.78 1.41 9.17 3.7L12 19.3 2.83 11.2C5.22 8.91 8.45 7.5 12 7.5z"/></svg>
+            </div>
+            <div>
+              <div style="font-size: 13px; font-weight: 800; color: var(--text-main);" id="wifiCurrentSsid">TP-DOMAIN (Connected)</div>
+              <div style="font-size: 11px; color: var(--text-muted);" id="wifiCurrentIp">IP Address: 10.42.18.105 • Signal: 95% (Excellent)</div>
+            </div>
+          </div>
+          <button class="btn-disconnect" id="wifiDisconnectBtn" onclick="disconnectCurrentWifi()">Disconnect</button>
+        </div>
+
+        <!-- CONNECT PASSWORD FORM (HIDDEN UNTIL NETWORK CLICKED) -->
+        <div id="wifiConnectBox" class="wifi-connect-box">
+          <div style="font-size: 13px; font-weight: 800; color: var(--tp-light-blue);" id="selectedNetworkLabel">
+            Connect to Network
+          </div>
+
+          <div id="enterpriseFields" style="display: none;" class="wifi-input-group">
+            <label>Domain Username / Employee ID</label>
+            <input type="text" id="wifiUserInput" placeholder="e.g. emp1022">
+          </div>
+
+          <div class="wifi-input-group">
+            <label id="wifiPassLabel">Security Password / Key</label>
+            <input type="password" id="wifiPassInput" placeholder="Enter network security key">
+          </div>
+
+          <div id="wifiConnectErr" style="font-size: 11px; color: var(--status-low); display: none;">
+            Incorrect password or network unreachable. Please retry.
+          </div>
+
+          <div class="wifi-btn-row">
+            <button class="btn-cancel-connect" onclick="cancelWifiConnect()">Cancel</button>
+            <button class="btn-connect" id="btnSubmitWifi" onclick="submitWifiConnect()">Connect & Save</button>
+          </div>
+        </div>
+
+        <!-- AVAILABLE NETWORKS LIST -->
+        <div class="network-list-header">
+          <h3>Available Networks (In Range)</h3>
+          <button class="scan-btn" onclick="rescanWifiNetworks()">
+            <svg style="width: 12px; height: 12px; fill: currentColor;" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0 0 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 0 0 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+            <span id="scanText">Scan Again</span>
+          </button>
+        </div>
+
+        <div class="network-list" id="networkListContainer">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: ANALYTICS & 3-DAY DEMAND PLANNING
+       ========================================================================= -->
+  <div id="analyticsModal" class="modal-backdrop">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <svg style="width: 20px; height: 20px; fill: var(--accent-yellow);" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+          <div>
+            <h2 id="modalMeterName">Meter Details</h2>
+            <div style="font-size: 11px; color: var(--text-muted);">TATA POWER-DDL • MMG Store Keshavpuram • 3-Year Historical Demand Model</div>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="closeAnalyticsModal()" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-label">Opening Stock (17.10)</div>
+            <div class="kpi-val" id="kpiOpening">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Issued (18.10)</div>
+            <div class="kpi-val" id="kpiIssued" style="color: var(--accent-cyan);">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Available Balance</div>
+            <div class="kpi-val" id="kpiAvailable" style="color: var(--status-ok);">0</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Predicted 3-Day Demand</div>
+            <div class="kpi-val" id="kpiForecastTotal" style="color: var(--forecast-purple);">0</div>
+          </div>
+        </div>
+
+        <div class="forecast-banner">
+          <div class="forecast-days">
+            <div class="forecast-day-box">
+              <div class="day-title">Mon (19 Oct)</div>
+              <div class="day-qty" id="fcDay1">--</div>
+            </div>
+            <div class="forecast-day-box">
+              <div class="day-title">Tue (20 Oct)</div>
+              <div class="day-qty" id="fcDay2">--</div>
+            </div>
+            <div class="forecast-day-box">
+              <div class="day-title">Wed (21 Oct)</div>
+              <div class="day-qty" id="fcDay3">--</div>
+            </div>
+          </div>
+          <div class="forecast-recommendation" id="fcAdvisory">
+            Analyzing 3-year store historical trend...
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-header-row">
+            <div style="font-size: 13px; font-weight: 700; color: var(--accent-cyan);">
+              📈 3-Year Trend & Predictive Forecast Projection
+            </div>
+
+            <div class="filter-tabs">
+              <button class="filter-btn active" onclick="setChartFilter('1M', this)">Last 1 Month</button>
+              <button class="filter-btn" onclick="setChartFilter('Q1', this)">Q1 FY 25-26</button>
+              <button class="filter-btn" onclick="setChartFilter('Q2', this)">Q2 FY 25-26</button>
+              <button class="filter-btn" onclick="setChartFilter('Q3', this)">Q3 FY 25-26</button>
+              <button class="filter-btn" onclick="setChartFilter('Q4', this)">Q4 FY 25-26</button>
+              <button class="filter-btn" onclick="setChartFilter('FY', this)">Full FY 25-26</button>
+            </div>
+          </div>
+
+          <div class="chart-legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: var(--status-ok);"></div>
+              <span style="color: var(--status-ok);">Available</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: var(--accent-cyan);"></div>
+              <span style="color: var(--accent-cyan);">Issued</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: var(--accent-yellow);"></div>
+              <span style="color: var(--accent-yellow);">Opening / Inward</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: var(--forecast-purple);"></div>
+              <span style="color: var(--forecast-purple);">Forecast (Next 3 Days)</span>
+            </div>
+          </div>
+
+          <canvas id="trendCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: MOBILE ENTRY PORTAL & DYNAMIC QR CODE
+       ========================================================================= -->
+  <div id="qrModal" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 480px; text-align: center;">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <svg style="width: 20px; height: 20px; fill: var(--tp-blue);" viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+          <div>
+            <h2>Mobile Store Entry Portal</h2>
+            <div style="font-size: 11px; color: var(--text-muted);">Instant Phone Access for Store Keepers & Field Staff</div>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="closeQrModal()" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body" style="align-items: center; padding: 20px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px; text-align: center;">
+          Scan this QR code with your mobile camera to submit stock inward/outward entries on the go:
+        </p>
+        
+        <div style="background: #ffffff; padding: 12px; border-radius: 12px; border: 2px solid var(--border-color); display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+          <img id="qrCodeImg" src="" alt="Scan QR Code" style="width: 190px; height: 190px; display: block;">
+        </div>
+
+        <div style="margin-top: 14px; width: 100%;">
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px;">Direct Phone / Web Link:</div>
+          <div style="display: flex; gap: 6px;">
+            <input type="text" id="mobileUrlInput" readonly style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 12px; background: var(--bg-dark); color: var(--text-main); font-weight: 600;">
+            <button onclick="copyMobileUrl()" class="btn-connect" style="padding: 8px 14px; white-space: nowrap;">Copy Link</button>
+          </div>
+          <a id="mobileDirectLink" href="#" target="_blank" style="display: inline-block; margin-top: 8px; font-size: 12px; color: var(--tp-light-blue); font-weight: 700; text-decoration: none;">🔗 Open in New Browser Tab &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: GOOGLE SHEETS CLOUD SYNC CONFIGURATION
+       ========================================================================= -->
+  <div id="cloudModal" class="modal-backdrop">
+    <div class="modal-window" style="max-width: 540px;">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <svg style="width: 20px; height: 20px; fill: var(--tp-blue);" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+          <div>
+            <h2>Google Sheets Cloud Database</h2>
+            <div style="font-size: 11px; color: var(--text-muted);">Real-time Cloud Sync with TPDDL_MMG_Stores_Database.xlsx</div>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="closeCloudModal()" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 18px 22px;">
+        <div id="cloudStatusBanner" style="background: #eef7ee; border: 1px solid #86efac; color: #15803d; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 700;">
+          🟢 Local Database Bridge Active (Port 8765)
+        </div>
+
+        <div style="margin-top: 10px;">
+          <label style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">
+            Google Apps Script Web App URL (Optional Cloud Webhook):
+          </label>
+          <input type="text" id="googleSheetsUrlInput" placeholder="https://script.google.com/macros/s/AKfycb.../exec" style="width: 100%; padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: var(--bg-dark); color: var(--text-main); outline: none;">
+          <span style="font-size: 10.5px; color: var(--text-muted); margin-top: 4px; display: block;">
+            Paste the Web App URL from your Google Sheet (Extensions &rarr; Apps Script &rarr; Deploy &rarr; Web app).
+          </span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+          <button onclick="clearCloudUrl()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer;">Clear / Disconnect</button>
+          <button onclick="saveAndTestCloudUrl()" class="btn-connect" id="btnSaveCloud">Save & Test Cloud Sync</button>
+        </div>
+
+        <div id="cloudTestResult" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: 6px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // INVENTORY DATASET & INSTANT PORTAL SYNCHRONIZATION
+    // =========================================================================
+    const DEFAULT_INVENTORY = [
+      { id: 1,  code: "TPDDL-MTR-01", name: "LTCT Meter (Single Phase)", opening: 500, issued: 180, low: 25, high: 60, d1: 20, d2: 18, d3: 16, lastUpdated: "18.10.2026, 12:15 PM" },
+      { id: 2,  code: "TPDDL-MTR-02", name: "PP WC Meter (Poly Phase)",  opening: 300, issued: 12,  low: 20, high: 50, d1: 11, d2: 10, d3: 9,  lastUpdated: "18.10.2026, 10:45 AM" },
+      { id: 3,  code: "TPDDL-MTR-03", name: "HT Meter (High Tension)",   opening: 150, issued: 152, low: 15, high: 35, d1: 6,  d2: 5,  d3: 4,  lastUpdated: "18.10.2026, 11:30 AM" },
+      { id: 4,  code: "TPDDL-MTR-04", name: "Net Meter (Solar Rooftop)", opening: 400, issued: 247, low: 30, high: 70, d1: 16, d2: 14, d3: 13, lastUpdated: "18.10.2026, 12:12 PM" },
+      { id: 5,  code: "TPDDL-MTR-05", name: "Prepaid Smart Meter",       opening: 250, issued: 215, low: 20, high: 50, d1: 24, d2: 21, d3: 20, lastUpdated: "18.10.2026, 09:40 AM" },
+      { id: 6,  code: "TPDDL-MTR-06", name: "CT Ratio Meter",            opening: 180, issued: 88,  low: 20, high: 45, d1: 10, d2: 9,  d3: 8,  lastUpdated: "17.10.2026, 05:30 PM" },
+      { id: 7,  code: "TPDDL-MTR-07", name: "Smart Grid AMI Meter",      opening: 600, issued: 310, low: 40, high: 90, d1: 30, d2: 28, d3: 26, lastUpdated: "18.10.2026, 09:15 AM" },
+      { id: 8,  code: "TPDDL-MTR-08", name: "Whole Current Meter",       opening: 350, issued: 140, low: 25, high: 60, d1: 15, d2: 14, d3: 13, lastUpdated: "17.10.2026, 04:50 PM" },
+      { id: 9,  code: "TPDDL-MTR-09", name: "Energy Meter 1-Phase",      opening: 800, issued: 420, low: 50, high: 120, d1: 45, d2: 40, d3: 38, lastUpdated: "18.10.2026, 08:30 AM" },
+      { id: 10, code: "TPDDL-MTR-10", name: "Energy Meter 3-Phase",      opening: 450, issued: 210, low: 30, high: 75, d1: 22, d2: 20, d3: 19, lastUpdated: "17.10.2026, 03:20 PM" }
+    ];
+
+    let inventoryData = DEFAULT_INVENTORY;
+    try {
+      const saved = localStorage.getItem('tpddl_inventory_data');
+      if (saved) {
+        inventoryData = JSON.parse(saved);
+        // Ensure every item has a lastUpdated timestamp
+        let needsSave = false;
+        inventoryData.forEach(item => {
+          if (!item.lastUpdated) {
+            const def = DEFAULT_INVENTORY.find(d => d.code === item.code);
+            item.lastUpdated = def ? def.lastUpdated : "18.10.2026, 09:30 AM";
+            needsSave = true;
+          }
+        });
+        if (needsSave) {
+          localStorage.setItem('tpddl_inventory_data', JSON.stringify(inventoryData));
+        }
+      } else {
+        localStorage.setItem('tpddl_inventory_data', JSON.stringify(DEFAULT_INVENTORY));
+      }
+    } catch (e) {
+      console.warn("Storage access:", e);
+    }
+
+    // PURE STORE DISPLAY / KIOSK MODE DETECTION (?kiosk=1 or ?display=1)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('kiosk') === '1' || urlParams.get('display') === '1') {
+      document.body.classList.add('kiosk-mode');
+    }
+
+    // BROADCAST CHANNEL FOR 0ms INSTANT REFLECTION ACROSS BROWSER TABS/WINDOWS
+    const inventorySyncChannel = new BroadcastChannel('tpddl_inventory_sync');
+    inventorySyncChannel.onmessage = (event) => {
+      if (event.data && event.data.type === 'STOCK_UPDATED') {
+        console.log("⚡ Instant stock sync received via BroadcastChannel:", event.data);
+        if (event.data.updatedInventory) {
+          inventoryData = event.data.updatedInventory;
+          localStorage.setItem('tpddl_inventory_data', JSON.stringify(inventoryData));
+          renderMainTable();
+          highlightRow(event.data.meter);
+          showInstantToast(`⚡ Stock Updated: ${event.data.meter || 'New Transaction'}`);
+          updateSyncTimestamp();
+        }
+      }
+    };
+
+    // LOCAL STORAGE SYNC LISTENER (Triggers immediately across tabs)
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'tpddl_inventory_data' && e.newValue) {
+        try {
+          inventoryData = JSON.parse(e.newValue);
+          renderMainTable();
+          updateSyncTimestamp();
+        } catch (err) {}
+      }
+    });
+
+    // =========================================================================
+    // GOOGLE SHEETS CLOUD SYNC & UNIVERSAL MOBILE ACCESS (PHASE 2)
+    // =========================================================================
+    let googleSheetsApiUrl = localStorage.getItem('tpddl_sheets_api_url') || "";
+
+    function updateCloudSyncUI() {
+      const label = document.getElementById('cloudSyncLabel');
+      const banner = document.getElementById('cloudStatusBanner');
+      const input = document.getElementById('googleSheetsUrlInput');
+      if (input) input.value = googleSheetsApiUrl;
+
+      if (googleSheetsApiUrl && googleSheetsApiUrl.trim().length > 15) {
+        if (label) {
+          label.textContent = "🟢 Sheets Cloud Live";
+          label.style.color = "var(--status-ok)";
+        }
+        if (banner) {
+          banner.innerHTML = "🟢 <b>Google Sheets Connected:</b> Real-time bidirectional cloud sync enabled with Apps Script Webhook.";
+          banner.style.background = "#eef7ee";
+          banner.style.borderColor = "#86efac";
+          banner.style.color = "#15803d";
+        }
+      } else {
+        if (label) {
+          label.textContent = "☁️ Cloud Database";
+          label.style.color = "var(--tp-blue)";
+        }
+        if (banner) {
+          banner.innerHTML = "🟡 <b>Local Database Bridge Active:</b> Connect Google Sheets Web App URL below for universal cloud sync.";
+          banner.style.background = "#fffbeb";
+          banner.style.borderColor = "#fcd34d";
+          banner.style.color = "#b45309";
+        }
+      }
+    }
+
+    function openCloudModal() {
+      updateCloudSyncUI();
+      document.getElementById('cloudTestResult').style.display = 'none';
+      document.getElementById('cloudModal').style.display = 'flex';
+    }
+
+    function closeCloudModal() {
+      document.getElementById('cloudModal').style.display = 'none';
+    }
+
+    async function saveAndTestCloudUrl() {
+      const url = document.getElementById('googleSheetsUrlInput').value.trim();
+      const resEl = document.getElementById('cloudTestResult');
+      const btn = document.getElementById('btnSaveCloud');
+
+      if (!url) {
+        clearCloudUrl();
+        return;
+      }
+
+      btn.textContent = "Testing Connection...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.inventory) {
+            googleSheetsApiUrl = url;
+            localStorage.setItem('tpddl_sheets_api_url', url);
+            updateCloudSyncUI();
+            resEl.textContent = `✅ Successfully connected to Google Sheets! Received ${data.inventory.length} live meter rows.`;
+            resEl.style.background = "#eef7ee";
+            resEl.style.color = "#15803d";
+            resEl.style.display = 'block';
+            handleNewInventoryData(data.inventory, "Google Sheets Cloud");
+            btn.textContent = "Saved & Verified ✓";
+            setTimeout(() => { btn.disabled = false; btn.textContent = "Save & Test Cloud Sync"; }, 2500);
+            return;
+          }
+        }
+        throw new Error("Invalid response from Google Apps Script");
+      } catch (err) {
+        resEl.textContent = `⚠️ Connection failed: Make sure deployment is set to 'Execute as: Me' and 'Who has access: Anyone'. (${err.message})`;
+        resEl.style.background = "#fee2e2";
+        resEl.style.color = "#b91c1c";
+        resEl.style.display = 'block';
+        btn.textContent = "Save & Test Cloud Sync";
+        btn.disabled = false;
+      }
+    }
+
+    function clearCloudUrl() {
+      googleSheetsApiUrl = "";
+      localStorage.removeItem('tpddl_sheets_api_url');
+      updateCloudSyncUI();
+      const resEl = document.getElementById('cloudTestResult');
+      resEl.textContent = "Cloud URL cleared. Operating on Local Python Bridge / Browser Storage.";
+      resEl.style.background = "#f1f5f9";
+      resEl.style.color = "#475569";
+      resEl.style.display = 'block';
+    }
+
+    // MOBILE QR PORTAL MODAL
+    function openQrModal() {
+      const host = (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+        ? window.location.hostname
+        : (currentWifi.ip && currentWifi.ip !== '0.0.0.0' ? currentWifi.ip : '127.0.0.1');
+      
+      const port = window.location.port ? `:${window.location.port}` : (window.location.protocol === 'http:' ? ':8765' : '');
+      let mobileUrl = `${window.location.protocol}//${host}${port}/store_entry_portal.html`;
+      if (googleSheetsApiUrl && googleSheetsApiUrl.trim().length > 15) {
+        mobileUrl += `?cloud=${encodeURIComponent(googleSheetsApiUrl.trim())}`;
+      }
+
+      document.getElementById('mobileUrlInput').value = mobileUrl;
+      document.getElementById('mobileDirectLink').href = mobileUrl;
+      document.getElementById('qrCodeImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(mobileUrl)}`;
+      document.getElementById('qrModal').style.display = 'flex';
+    }
+
+    function closeQrModal() {
+      document.getElementById('qrModal').style.display = 'none';
+    }
+
+    function copyMobileUrl() {
+      const input = document.getElementById('mobileUrlInput');
+      input.select();
+      navigator.clipboard.writeText(input.value);
+      alert(`📋 Link copied: ${input.value}\nShare on WhatsApp or open on any smartphone!`);
+    }
+
+    // BACKEND REST API POLLING (Supports Google Sheets Cloud + Local Bridge)
+    async function fetchLiveInventoryFromBridge() {
+      // 1. Check Google Sheets Cloud API first if configured
+      if (googleSheetsApiUrl && googleSheetsApiUrl.trim().length > 15) {
+        try {
+          const res = await fetch(googleSheetsApiUrl, { cache: 'no-store' });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.inventory) && data.inventory.length > 0) {
+              handleNewInventoryData(data.inventory, "Google Sheets Cloud");
+              return;
+            }
+          }
+        } catch (err) {
+          console.warn("Google Sheets fetch error, checking local bridge:", err);
+        }
+      }
+
+      // 2. Fallback to Local Python bridge
+      const apiHost = window.location.hostname ? `http://${window.location.hostname}:8765/api/inventory` : 'http://127.0.0.1:8765/api/inventory';
+      try {
+        const res = await fetch(apiHost, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && Array.isArray(data.inventory)) {
+            handleNewInventoryData(data.inventory, "Store Bridge");
+          }
+        }
+      } catch (err) {
+        // Bridge offline, fallback to localStorage & BroadcastChannel
+      }
+    }
+
+    function handleNewInventoryData(newInventory, sourceLabel) {
+      const currentStr = JSON.stringify(inventoryData);
+      const newStr = JSON.stringify(newInventory);
+      if (currentStr !== newStr) {
+        let changedMeter = null;
+        if (Array.isArray(inventoryData)) {
+          for (let newItem of newInventory) {
+            const oldItem = inventoryData.find(o => o.code === newItem.code);
+            if (oldItem && (oldItem.issued !== newItem.issued || oldItem.opening !== newItem.opening || oldItem.lastUpdated !== newItem.lastUpdated)) {
+              changedMeter = newItem.name;
+              break;
+            }
+          }
+        }
+        inventoryData = newInventory;
+        localStorage.setItem('tpddl_inventory_data', newStr);
+        renderMainTable();
+        if (changedMeter) {
+          highlightRow(changedMeter);
+          showInstantToast(`⚡ Stock Updated from ${sourceLabel}: ${changedMeter}`);
+        } else {
+          showInstantToast(`⚡ Stock Synchronized with ${sourceLabel}`);
+        }
+        updateSyncTimestamp();
+      }
+    }
+    setInterval(fetchLiveInventoryFromBridge, 1000);
+    fetchLiveInventoryFromBridge();
+    updateCloudSyncUI();
+
+    // =========================================================================
+    // OFFLINE RESILIENCE — Show/hide offline bar, outbox badge on dashboard
+    // =========================================================================
+    function updateDashboardOutboxBadge(count) {
+      const badge = document.getElementById('dashboardOutboxBadge');
+      if (!badge) return;
+      if (count > 0) {
+        badge.textContent = `⏳ ${count} pending cloud sync${count > 1 ? 's' : ''}`;
+        badge.style.display = 'block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function showOfflineBar(show) {
+      const bar = document.getElementById('offlineBar');
+      if (bar) bar.style.display = show ? 'block' : 'none';
+    }
+
+    // Check outbox from localStorage (shared with portal page)
+    function checkOutboxCount() {
+      try {
+        const outbox = JSON.parse(localStorage.getItem('tpddl_cloud_outbox') || '[]');
+        updateDashboardOutboxBadge(outbox.length);
+      } catch (e) {}
+    }
+    checkOutboxCount();
+    setInterval(checkOutboxCount, 5000); // re-check every 5s
+
+    // Listen for outbox count updates from portal via BroadcastChannel
+    syncChannel.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'OUTBOX_COUNT') {
+        updateDashboardOutboxBadge(event.data.count);
+      }
+    });
+
+    // Online / Offline status
+    window.addEventListener('offline', () => {
+      showOfflineBar(true);
+      showInstantToast('📡 Internet disconnected — running on cached data');
+    });
+
+    window.addEventListener('online', () => {
+      showOfflineBar(false);
+      showInstantToast('🌐 Internet restored — syncing with Google Sheets...');
+      // Re-trigger fetch immediately
+      setTimeout(fetchLiveInventoryFromBridge, 1500);
+    });
+
+    if (!navigator.onLine) showOfflineBar(true);
+
+    function showInstantToast(msg) {
+      const toast = document.getElementById('liveSyncToast');
+      const text = document.getElementById('liveSyncToastMsg');
+      if (toast && text) {
+        text.textContent = msg;
+        toast.style.display = 'flex';
+        setTimeout(() => {
+          toast.style.display = 'none';
+        }, 4500);
+      }
+    }
+
+    function highlightRow(meterName) {
+      if (!meterName) return;
+      const cleanTarget = meterName.toLowerCase();
+      document.querySelectorAll('#inventoryTableBody tr').forEach(tr => {
+        const rowName = (tr.dataset.meterName || '').toLowerCase();
+        if (rowName.includes(cleanTarget) || cleanTarget.includes(rowName)) {
+          tr.classList.remove('row-updated-flash');
+          void tr.offsetWidth; // trigger reflow
+          tr.classList.add('row-updated-flash');
+        }
+      });
+    }
+
+    let selectedMeter = inventoryData[0];
+    let currentFilter = '1M';
+    let focusedIndex = 0;
+
+    // CLOCK RUNNER (STACKED TIME ON TOP, DATE BELOW)
+    function updateLiveClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-IN', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+      });
+      const dateStr = now.toLocaleDateString('en-IN', {
+        weekday: 'short', day: '2-digit', month: 'short', year: 'numeric'
+      });
+      const timeEl = document.getElementById('liveClockTime');
+      const dateEl = document.getElementById('liveClockDate');
+      if (timeEl) timeEl.textContent = timeStr;
+      if (dateEl) dateEl.textContent = dateStr;
+    }
+    setInterval(updateLiveClock, 1000);
+    updateLiveClock();
+
+    function updateSyncTimestamp() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      document.getElementById('lastSyncedText').textContent = `Last Synced on: ${dateStr}, ${timeStr}`;
+    }
+
+    // PERMANENT LIGHT MODE ENFORCEMENT
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.removeItem('tpddl_theme');
+    localStorage.removeItem('tpddl_font');
+
+    // =========================================================================
+    // RENDER MAIN INVENTORY TABLE (STRAIGHT ALIGNMENT)
+    // =========================================================================
+    function renderMainTable() {
+      const tbody = document.getElementById('inventoryTableBody');
+      tbody.innerHTML = "";
+      let totalStock = 0;
+
+      inventoryData.forEach((item, index) => {
+        const available = item.opening - item.issued;
+        totalStock += available;
+        const totalForecast3D = item.d1 + item.d2 + item.d3;
+
+        let badgeClass = "stock-ok";
+        let statusLabel = "✓ NORMAL";
+        let statusIcon = `<svg style="width: 12px; height: 12px; fill: var(--status-ok);" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>`;
+
+        if (available <= item.low) {
+          badgeClass = "stock-low";
+          statusLabel = "CRITICAL";
+          statusIcon = `<svg style="width: 12px; height: 12px; fill: var(--status-low);" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 14h-2v-2h2v2zm0-4h-2V8h2v4z"/></svg>`;
+        } else if (available <= item.high) {
+          badgeClass = "stock-mid";
+          statusLabel = "REORDER";
+          statusIcon = `<svg style="width: 12px; height: 12px; fill: var(--status-mid);" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`;
+        }
+
+        let predBadgeHtml = `<span class="pred-badge pred-safe">✓ SAFE BUFFER</span>`;
+        if (available < totalForecast3D) {
+          const deficit = totalForecast3D - available;
+          predBadgeHtml = `<span class="pred-badge pred-danger">🚨 SHORTAGE: -${deficit}</span>`;
+        } else if (available < totalForecast3D * 1.4) {
+          predBadgeHtml = `<span class="pred-badge pred-warn">⚠ LOW BUFFER</span>`;
+        }
+
+        const tr = document.createElement('tr');
+        tr.id = 'row-' + item.code;
+        tr.dataset.meterName = item.name;
+        if (index === focusedIndex) tr.classList.add('focused');
+
+        tr.onclick = () => openAnalyticsModal(item);
+        tr.innerHTML = `
+          <td><span class="key-badge">${index + 1}</span></td>
+          <td>
+            <div class="item-title-box">
+              <span class="item-name">${item.name}</span>
+              <div class="item-sync-meta">
+                <span class="code-tag">${item.code}</span>
+                <span class="row-last-updated" title="Individual transaction sync timestamp for this meter">
+                  Last updated on: <span class="update-time-highlight">${item.lastUpdated || '18.10.2026, 09:30 AM'}</span>
+                </span>
+              </div>
+            </div>
+          </td>
+          <td class="num" style="color: var(--text-muted); font-size: 15px; font-weight: 700;">${item.opening.toLocaleString()}</td>
+          <td class="num" style="color: var(--tp-blue); font-size: 15px; font-weight: 800;">-${item.issued.toLocaleString()}</td>
+          <td class="num"><span class="stock-badge ${badgeClass}">${available.toLocaleString()}</span></td>
+          <td style="text-align: center;">
+            <span class="status-tag ${badgeClass}">
+              ${statusIcon}
+              <span>${statusLabel}</span>
+            </span>
+          </td>
+          <td class="num">
+            <div class="prediction-container">
+              <div class="pred-number-box">
+                <span class="pred-number">${totalForecast3D}</span>
+                <span class="pred-unit">units</span>
+              </div>
+              <div class="pred-details-col">
+                ${predBadgeHtml}
+                <span class="pred-mini-split">Mon:${item.d1} | Tue:${item.d2} | Wed:${item.d3}</span>
+              </div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalStockCount').textContent = totalStock.toLocaleString();
+    }
+
+    renderMainTable();
+
+    // =========================================================================
+    // REAL HARDWARE WI-FI BRIDGE INTEGRATION (Port 8765)
+    // =========================================================================
+    const WIFI_API_BASE = 'http://127.0.0.1:8765/api/wifi';
+    let isHardwareBridgeOnline = false;
+
+    let currentWifi = {
+      connected: true,
+      ssid: "Saxena-5G",
+      ip: "192.168.1.11",
+      signal: "100%",
+      security: "WPA2-Personal",
+      isEnterprise: false
+    };
+
+    let availableNetworks = [
+      { ssid: "Saxena-5G", signal: 100, security: "WPA2-Personal", isEnterprise: false }
+    ];
+
+    let connectingNetwork = null;
+
+    // Check live hardware Wi-Fi status from local Python bridge
+    async function syncHardwareWifiStatus() {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`${WIFI_API_BASE}/status`, { signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          isHardwareBridgeOnline = true;
+          currentWifi = {
+            connected: Boolean(data.connected),
+            ssid: data.ssid || "Disconnected",
+            ip: data.ip || "0.0.0.0",
+            signal: data.signal || "0%",
+            security: data.security || "WPA2",
+            isEnterprise: Boolean(data.isEnterprise),
+            hardware: data.hardware || "WLAN"
+          };
+
+          const badge = document.getElementById('hwBridgeBadge');
+          if (badge) {
+            badge.textContent = `🟢 Real Hardware Active (${currentWifi.hardware})`;
+            badge.style.background = 'rgba(0, 230, 118, 0.15)';
+            badge.style.color = 'var(--status-ok)';
+            badge.style.borderColor = 'rgba(0, 230, 118, 0.3)';
+          }
+          const notice = document.getElementById('hwBridgeNotice');
+          if (notice) notice.style.display = 'none';
+
+          updateWifiStatusUI();
+          return true;
+        }
+      } catch (err) {
+        // Bridge not running or standalone mode
+        isHardwareBridgeOnline = false;
+        const badge = document.getElementById('hwBridgeBadge');
+        if (badge) {
+          badge.textContent = '🟡 Fallback Mode';
+          badge.style.background = 'rgba(255, 171, 0, 0.15)';
+          badge.style.color = 'var(--status-mid)';
+          badge.style.borderColor = 'rgba(255, 171, 0, 0.3)';
+        }
+        const notice = document.getElementById('hwBridgeNotice');
+        if (notice) notice.style.display = 'block';
+      }
+      return false;
+    }
+
+    // Scan real physical Wi-Fi networks in range
+    async function scanHardwareWifiNetworks() {
+      if (!isHardwareBridgeOnline) {
+        renderNetworkList();
+        return;
+      }
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 7000);
+        const res = await fetch(`${WIFI_API_BASE}/scan`, { signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const nets = await res.json();
+          if (Array.isArray(nets) && nets.length > 0) {
+            availableNetworks = nets;
+          }
+        }
+      } catch (err) {
+        console.warn("Real Wi-Fi scan error or timeout:", err);
+      }
+      renderNetworkList();
+    }
+
+    async function openWifiModal() {
+      await syncHardwareWifiStatus();
+      await scanHardwareWifiNetworks();
+      document.getElementById('wifiConnectBox').style.display = 'none';
+      document.getElementById('wifiModal').style.display = 'flex';
+    }
+
+    function closeWifiModal() {
+      document.getElementById('wifiModal').style.display = 'none';
+    }
+
+    function updateWifiStatusUI() {
+      const ssidEl = document.getElementById('wifiCurrentSsid');
+      const ipEl = document.getElementById('wifiCurrentIp');
+      const iconBox = document.getElementById('wifiStatusIconBox');
+      const btnDis = document.getElementById('wifiDisconnectBtn');
+      const headerSsid = document.getElementById('headerWifiSsid');
+      const headerIcon = document.getElementById('headerWifiIcon');
+
+      if (currentWifi.connected && currentWifi.ssid !== "None" && currentWifi.ssid !== "Disconnected") {
+        ssidEl.textContent = `${currentWifi.ssid} (Connected)`;
+        ipEl.textContent = `IP Address: ${currentWifi.ip} • Signal: ${currentWifi.signal} • Security: ${currentWifi.security || 'WPA2'}`;
+        iconBox.style.background = 'rgba(0, 230, 118, 0.15)';
+        iconBox.style.color = 'var(--status-ok)';
+        btnDis.style.display = 'inline-block';
+        headerSsid.textContent = currentWifi.ssid;
+        headerSsid.style.color = 'var(--status-ok)';
+        headerIcon.style.fill = 'var(--status-ok)';
+      } else {
+        ssidEl.textContent = "Disconnected (No WiFi Connection)";
+        ipEl.textContent = "Select a wireless network below and enter password to connect.";
+        iconBox.style.background = 'rgba(255, 23, 68, 0.15)';
+        iconBox.style.color = 'var(--status-low)';
+        btnDis.style.display = 'none';
+        headerSsid.textContent = "OFFLINE";
+        headerSsid.style.color = 'var(--status-low)';
+        headerIcon.style.fill = 'var(--status-low)';
+      }
+    }
+
+    function renderNetworkList() {
+      const container = document.getElementById('networkListContainer');
+      container.innerHTML = "";
+
+      if (!availableNetworks || availableNetworks.length === 0) {
+        container.innerHTML = '<div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 12px;">No wireless networks detected in range. Click "Scan Again".</div>';
+        return;
+      }
+
+      availableNetworks.forEach(net => {
+        const isConnected = currentWifi.connected && currentWifi.ssid === net.ssid;
+        const div = document.createElement('div');
+        div.className = `network-item ${isConnected ? 'connected' : ''}`;
+        div.onclick = () => selectNetworkToConnect(net);
+
+        div.innerHTML = `
+          <div class="net-name-area">
+            <svg style="width: 16px; height: 16px; fill: ${isConnected ? 'var(--status-ok)' : 'var(--text-muted)'};" viewBox="0 0 24 24"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4zm0 3.5c3.55 0 6.78 1.41 9.17 3.7L12 19.3 2.83 11.2C5.22 8.91 8.45 7.5 12 7.5z"/></svg>
+            <div>
+              <div class="net-name">${net.ssid} ${isConnected ? '<span style="color: var(--status-ok); font-size: 11px;">(Connected)</span>' : ''}</div>
+              <div class="net-sec-badge">${net.security || 'WPA2'}${net.channel ? ` • Ch ${net.channel}` : ''}</div>
+            </div>
+          </div>
+          <div class="net-meta-area">
+            <span>${net.signal}%</span>
+            <span>🔒</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function selectNetworkToConnect(net) {
+      if (currentWifi.connected && currentWifi.ssid === net.ssid) {
+        alert(`Already connected to ${net.ssid}`);
+        return;
+      }
+
+      connectingNetwork = net;
+      const box = document.getElementById('wifiConnectBox');
+      document.getElementById('selectedNetworkLabel').textContent = `Connect to ${net.ssid} (${net.security || 'Secured'})`;
+      document.getElementById('wifiPassInput').value = '';
+      document.getElementById('wifiConnectErr').style.display = 'none';
+
+      const entGroup = document.getElementById('enterpriseFields');
+      if (net.isEnterprise) {
+        entGroup.style.display = 'flex';
+      } else {
+        entGroup.style.display = 'none';
+      }
+
+      box.style.display = 'flex';
+      box.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function cancelWifiConnect() {
+      document.getElementById('wifiConnectBox').style.display = 'none';
+      connectingNetwork = null;
+    }
+
+    async function submitWifiConnect() {
+      if (!connectingNetwork) return;
+      const pass = document.getElementById('wifiPassInput').value;
+      const btn = document.getElementById('btnSubmitWifi');
+
+      if (pass.length < 4) {
+        document.getElementById('wifiConnectErr').textContent = "Password too short! Please enter valid network security key.";
+        document.getElementById('wifiConnectErr').style.display = 'block';
+        return;
+      }
+
+      btn.textContent = "Connecting to Hardware...";
+      btn.disabled = true;
+
+      if (isHardwareBridgeOnline) {
+        try {
+          const res = await fetch(`${WIFI_API_BASE}/connect`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ssid: connectingNetwork.ssid, password: pass })
+          });
+          const result = await res.json();
+          if (result.success) {
+            btn.textContent = "Verifying Link...";
+            setTimeout(async () => {
+              await syncHardwareWifiStatus();
+              btn.textContent = "Connect & Save";
+              btn.disabled = false;
+              cancelWifiConnect();
+              renderNetworkList();
+              alert(`✅ Connected to ${connectingNetwork.ssid}! Hardware interface updated.`);
+            }, 3000);
+            return;
+          } else {
+            document.getElementById('wifiConnectErr').textContent = `Connection failed: ${result.error || 'Check password'}`;
+            document.getElementById('wifiConnectErr').style.display = 'block';
+            btn.textContent = "Connect & Save";
+            btn.disabled = false;
+            return;
+          }
+        } catch (err) {
+          console.warn("Bridge connect error:", err);
+        }
+      }
+
+      // Fallback simulation if bridge offline
+      setTimeout(() => {
+        btn.textContent = "Connect & Save";
+        btn.disabled = false;
+        currentWifi = {
+          connected: true,
+          ssid: connectingNetwork.ssid,
+          ip: "192.168.1." + Math.floor(100 + Math.random() * 80),
+          signal: `${connectingNetwork.signal}%`,
+          security: connectingNetwork.security,
+          isEnterprise: connectingNetwork.isEnterprise
+        };
+        cancelWifiConnect();
+        updateWifiStatusUI();
+        renderNetworkList();
+        alert(`✅ Connected to ${currentWifi.ssid}! Assigned IP: ${currentWifi.ip}`);
+      }, 1200);
+    }
+
+    async function disconnectCurrentWifi() {
+      if (confirm(`Disconnect from ${currentWifi.ssid}?`)) {
+        if (isHardwareBridgeOnline) {
+          try {
+            await fetch(`${WIFI_API_BASE}/disconnect`, { method: 'POST' });
+            await syncHardwareWifiStatus();
+            renderNetworkList();
+            return;
+          } catch (err) {
+            console.warn("Bridge disconnect error:", err);
+          }
+        }
+        currentWifi = {
+          connected: false,
+          ssid: "Disconnected",
+          ip: "0.0.0.0",
+          signal: "0%",
+          security: "None",
+          isEnterprise: false
+        };
+        updateWifiStatusUI();
+        renderNetworkList();
+      }
+    }
+
+    async function rescanWifiNetworks() {
+      const scanText = document.getElementById('scanText');
+      scanText.textContent = "Scanning...";
+      await syncHardwareWifiStatus();
+      await scanHardwareWifiNetworks();
+      scanText.textContent = "Scan Again";
+    }
+
+    // Initial hardware sync
+    syncHardwareWifiStatus();
+
+    // =========================================================================
+    // KEYBOARD NAVIGATION
+    // =========================================================================
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('analyticsModal');
+      const wifiModal = document.getElementById('wifiModal');
+
+      if (e.key === 'Escape') {
+        if (wifiModal.style.display === 'flex') closeWifiModal();
+        if (modal.style.display === 'flex') closeAnalyticsModal();
+        return;
+      }
+
+      if (modal.style.display !== 'flex' && wifiModal.style.display !== 'flex') {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          focusedIndex = (focusedIndex + 1) % inventoryData.length;
+          renderMainTable();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          focusedIndex = (focusedIndex - 1 + inventoryData.length) % inventoryData.length;
+          renderMainTable();
+        } else if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openAnalyticsModal(inventoryData[focusedIndex]);
+        }
+
+        const num = parseInt(e.key);
+        if (!isNaN(num) && num >= 1 && num <= inventoryData.length) {
+          openAnalyticsModal(inventoryData[num - 1]);
+        }
+      }
+    });
+
+    // =========================================================================
+    // MODAL DIALOG
+    // =========================================================================
+    function openAnalyticsModal(item) {
+      selectedMeter = item;
+      const available = item.opening - item.issued;
+      const totalForecast = item.d1 + item.d2 + item.d3;
+
+      document.getElementById('modalMeterName').textContent = `${item.name} (${item.code})`;
+      document.getElementById('kpiOpening').textContent = item.opening.toLocaleString();
+      document.getElementById('kpiIssued').textContent = item.issued.toLocaleString();
+      document.getElementById('kpiAvailable').textContent = available.toLocaleString();
+      document.getElementById('kpiForecastTotal').textContent = `${totalForecast} units`;
+
+      document.getElementById('fcDay1').textContent = `${item.d1}`;
+      document.getElementById('fcDay2').textContent = `${item.d2}`;
+      document.getElementById('fcDay3').textContent = `${item.d3}`;
+
+      const advEl = document.getElementById('fcAdvisory');
+      if (available < totalForecast) {
+        const deficit = totalForecast - available;
+        advEl.innerHTML = `<span style="color: var(--status-low); font-weight: 800;">🚨 URGENT INDENT REQUIRED:</span> 3-day expected demand (${totalForecast} units) exceeds available store stock (${available}) by <b>${deficit} units</b>. Initiate immediate stock transfer or purchase requisition of minimum 150 units.`;
+      } else if (available < totalForecast * 1.5) {
+        advEl.innerHTML = `<span style="color: var(--status-mid); font-weight: 800;">⚠️ TIGHT BUFFER:</span> Store stock will drop to approximately <b>${available - totalForecast} units</b> by Wednesday. Regular procurement recommended.`;
+      } else {
+        advEl.innerHTML = `<span style="color: var(--status-ok); font-weight: 800;">✓ STOCK SATISFACTORY:</span> Available store inventory safely covers the 3-day projected issuance (${totalForecast} units) with healthy safety margin.`;
+      }
+
+      drawTrendChart(currentFilter);
+      document.getElementById('analyticsModal').style.display = 'flex';
+    }
+
+    function closeAnalyticsModal() {
+      document.getElementById('analyticsModal').style.display = 'none';
+    }
+
+    function setChartFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      drawTrendChart(filter);
+    }
+
+    // CANVAS CHART
+    function drawTrendChart(filter) {
+      const canvas = document.getElementById('trendCanvas');
+      const ctx = canvas.getContext('2d');
+
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio || 900;
+      canvas.height = 200 * window.devicePixelRatio || 200;
+      ctx.scale(window.devicePixelRatio || 1, window.devicePixelRatio || 1);
+
+      const W = rect.width || 900;
+      const H = 200;
+
+      ctx.clearRect(0, 0, W, H);
+
+      let points = 8;
+      let labels = ["1 Oct", "4 Oct", "7 Oct", "10 Oct", "13 Oct", "16 Oct", "Today", "+3D Pred"];
+      if (filter === 'Q1') labels = ["Apr W1", "Apr W3", "May W1", "May W3", "Jun W1", "Jun W4", "Current", "+3D Pred"];
+      else if (filter === 'Q2') labels = ["Jul W1", "Jul W3", "Aug W1", "Aug W3", "Sep W1", "Sep W4", "Current", "+3D Pred"];
+      else if (filter === 'Q3') labels = ["Oct W1", "Oct W3", "Nov W1", "Nov W3", "Dec W1", "Dec W4", "Current", "+3D Pred"];
+      else if (filter === 'Q4') labels = ["Jan W1", "Jan W3", "Feb W1", "Feb W3", "Mar W1", "Mar W4", "Current", "+3D Pred"];
+      else if (filter === 'FY') labels = ["Q1 Mid", "Q1 End", "Q2 Mid", "Q2 End", "Q3 Mid", "Q3 End", "Today", "+3D Pred"];
+
+      const openBase = selectedMeter.opening;
+      const finalAvail = selectedMeter.opening - selectedMeter.issued;
+      const totalForecast3D = selectedMeter.d1 + selectedMeter.d2 + selectedMeter.d3;
+
+      const availData = [];
+      const issuedData = [];
+      const openData = [];
+
+      for (let i = 0; i < points - 1; i++) {
+        const progress = i / (points - 2);
+        const currIssued = Math.round(selectedMeter.issued * (0.2 + 0.8 * progress));
+        const currOpen = openBase;
+        const currAvail = currOpen - currIssued;
+
+        availData.push(currAvail);
+        issuedData.push(currIssued);
+        openData.push(currOpen);
+      }
+
+      const projectedIssued = selectedMeter.issued + totalForecast3D;
+      const projectedAvail = Math.max(0, finalAvail - totalForecast3D);
+      availData.push(projectedAvail);
+      issuedData.push(projectedIssued);
+      openData.push(openBase);
+
+      const maxVal = Math.max(...openData, projectedIssued) * 1.15;
+      const minVal = 0;
+
+      const paddingLeft = 45;
+      const paddingRight = 25;
+      const paddingTop = 15;
+      const paddingBottom = 25;
+      const graphW = W - paddingLeft - paddingRight;
+      const graphH = H - paddingTop - paddingBottom;
+
+      ctx.strokeStyle = isLight ? '#e2e8f0' : '#1a2740';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = isLight ? '#64748b' : '#8093b3';
+      ctx.font = '10px sans-serif';
+
+      const ySteps = 4;
+      for (let i = 0; i <= ySteps; i++) {
+        const val = Math.round(minVal + (maxVal - minVal) * (i / ySteps));
+        const y = H - paddingBottom - (i / ySteps) * graphH;
+        ctx.beginPath();
+        ctx.moveTo(paddingLeft, y);
+        ctx.lineTo(W - paddingRight, y);
+        ctx.stroke();
+        ctx.fillText(val, 10, y + 4);
+      }
+
+      labels.forEach((lbl, i) => {
+        const x = paddingLeft + (i / (points - 1)) * graphW;
+        ctx.fillStyle = (i === points - 1) ? '#7c3aed' : (isLight ? '#64748b' : '#8093b3');
+        ctx.fillText(lbl, x - 18, H - 6);
+      });
+
+      function drawLine(data, color, isDashed) {
+        ctx.beginPath();
+        if (isDashed) ctx.setLineDash([4, 4]);
+        else ctx.setLineDash([]);
+
+        data.forEach((val, i) => {
+          const x = paddingLeft + (i / (points - 1)) * graphW;
+          const y = H - paddingBottom - ((val - minVal) / (maxVal - minVal)) * graphH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        data.forEach((val, i) => {
+          const x = paddingLeft + (i / (points - 1)) * graphW;
+          const y = H - paddingBottom - ((val - minVal) / (maxVal - minVal)) * graphH;
+          ctx.beginPath();
+          ctx.arc(x, y, (i === points - 1) ? 5 : 3.5, 0, Math.PI * 2);
+          ctx.fillStyle = (i === points - 1) ? color : (isLight ? '#ffffff' : '#0d1424');
+          ctx.fill();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+      }
+
+      drawLine(openData, isLight ? '#b45309' : '#ffc400', false);
+      drawLine(issuedData, isLight ? '#0284c7' : '#00e5ff', false);
+      drawLine(availData, isLight ? '#16a34a' : '#00e676', false);
+    }
+
+    setInterval(() => {
+      updateSyncTimestamp();
+      syncHardwareWifiStatus();
+    }, 5000);
+  </script>
+</body>
+</html>
