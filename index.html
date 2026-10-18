@@ -183,15 +183,30 @@
       text-transform: uppercase;
     }
 
+    /* Hide Cloud Database button from top bar as requested */
+    #cloudSyncHeaderBtn {
+      display: none !important;
+    }
+
+    /* By default on Web, hide the WiFi button. In Kiosk mode (?kiosk=1), display it */
+    #wifiHeaderBtn {
+      display: none !important;
+    }
+
     /* =========================================================================
        PURE 24/7 STORE MONITOR KIOSK MODE (?kiosk=1)
-       Hides all interactive buttons, links, and modals so only pure store data displays
+       Hides interactive buttons, links, and modals so only pure store data displays
+       Shows WiFi button in kiosk mode so status (online/offline) is visible
        ========================================================================= */
     body.kiosk-mode #mobileQrHeaderBtn,
     body.kiosk-mode #cloudSyncHeaderBtn,
-    body.kiosk-mode #wifiHeaderBtn,
     body.kiosk-mode .modal-backdrop {
       display: none !important;
+    }
+
+    body.kiosk-mode #wifiHeaderBtn {
+      display: inline-flex !important;
+      pointer-events: none; /* In kiosk mode it acts as indicator only */
     }
 
     body.kiosk-mode header {
@@ -1436,7 +1451,11 @@
     // =========================================================================
     // GOOGLE SHEETS CLOUD SYNC & UNIVERSAL MOBILE ACCESS (PHASE 2)
     // =========================================================================
-    let googleSheetsApiUrl = localStorage.getItem('tpddl_sheets_api_url') || "";
+    const DEFAULT_GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyyEWweu1qAz_G7A96VtvNkGYY7tJBnv27pFrRomrVCHlp7UXog1B2kAO6lpVPLlE_oyQ/exec";
+    let googleSheetsApiUrl = localStorage.getItem('tpddl_sheets_api_url') || DEFAULT_GOOGLE_SHEETS_URL;
+    if (!localStorage.getItem('tpddl_sheets_api_url')) {
+      try { localStorage.setItem('tpddl_sheets_api_url', DEFAULT_GOOGLE_SHEETS_URL); } catch (e) {}
+    }
 
     function updateCloudSyncUI() {
       const label = document.getElementById('cloudSyncLabel');

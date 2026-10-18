@@ -638,8 +638,13 @@
       try { syncChannel.postMessage({ type: 'OUTBOX_COUNT', count: cloudOutbox.length }); } catch (e) {}
     }
 
+    const DEFAULT_GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyyEWweu1qAz_G7A96VtvNkGYY7tJBnv27pFrRomrVCHlp7UXog1B2kAO6lpVPLlE_oyQ/exec";
+    if (!localStorage.getItem('tpddl_sheets_api_url')) {
+      try { localStorage.setItem('tpddl_sheets_api_url', DEFAULT_GOOGLE_SHEETS_URL); } catch (e) {}
+    }
+
     function enqueueToCloud(payload) {
-      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url');
+      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url') || DEFAULT_GOOGLE_SHEETS_URL;
       if (!cloudUrl || cloudUrl.trim().length <= 15) return; // No cloud configured
       cloudOutbox.push({ payload: payload, queuedAt: new Date().toISOString() });
       saveOutbox();
@@ -647,7 +652,7 @@
     }
 
     async function flushOutbox() {
-      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url');
+      const cloudUrl = localStorage.getItem('tpddl_sheets_api_url') || DEFAULT_GOOGLE_SHEETS_URL;
       if (!cloudUrl || cloudUrl.trim().length <= 15) return;
       if (cloudOutbox.length === 0) return;
 
