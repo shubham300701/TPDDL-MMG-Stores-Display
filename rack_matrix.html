@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MMG Stores (KPM) — All 10 Racks Matrix Overview</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --tp-blue: #0b4d94;
+      --tp-light-blue: #0284c7;
+      --bg-main: #f0f4f9;
+      --card-bg: #ffffff;
+      --card-border: #dbe4ef;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      
+      --status-ok-bg: #ecfdf5;
+      --status-ok-border: #86efac;
+      --status-ok-text: #15803d;
+      
+      --status-mid-bg: #fffbeb;
+      --status-mid-border: #fcd34d;
+      --status-mid-text: #b45309;
+      
+      --status-low-bg: #fef2f2;
+      --status-low-border: #fca5a5;
+      --status-low-text: #dc2626;
+
+      --forecast-purple: #7c3aed;
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0b1120;
+      --card-bg: #131c31;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --status-ok-bg: rgba(16, 185, 129, 0.15);
+      --status-ok-border: rgba(16, 185, 129, 0.4);
+      --status-ok-text: #34d399;
+      
+      --status-mid-bg: rgba(245, 158, 11, 0.15);
+      --status-mid-border: rgba(245, 158, 11, 0.4);
+      --status-mid-text: #fbbf24;
+      
+      --status-low-bg: rgba(239, 68, 68, 0.18);
+      --status-low-border: rgba(239, 68, 68, 0.5);
+      --status-low-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-wrap img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .brand-wrap h1 {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--tp-blue);
+    }
+
+    [data-theme="dark"] .brand-wrap h1 {
+      color: #38bdf8;
+    }
+
+    .brand-wrap p {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .nav-btn:hover {
+      background: var(--card-border);
+    }
+
+    .matrix-container {
+      flex: 1;
+      padding: 16px;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .matrix-stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .stat-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .stat-pill b {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+    }
+
+    .racks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 14px;
+    }
+
+    .rack-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .rack-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border-color: var(--tp-light-blue);
+    }
+
+    .rack-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .rack-badge {
+      background: var(--tp-blue);
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .bay-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .rack-meter-name {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.25;
+      margin-top: 4px;
+    }
+
+    .rack-meter-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .rack-stock-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+
+    .rack-stock-val {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 44px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--status-ok-text);
+    }
+
+    .rack-stock-val.status-mid { color: var(--status-mid-text); }
+    .rack-stock-val.status-low { color: var(--status-low-text); }
+
+    .rack-status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      background: var(--status-ok-bg);
+      border: 1px solid var(--status-ok-border);
+      color: var(--status-ok-text);
+    }
+
+    .rack-status-tag.status-mid {
+      background: var(--status-mid-bg);
+      border-color: var(--status-mid-border);
+      color: var(--status-mid-text);
+    }
+
+    .rack-status-tag.status-low {
+      background: var(--status-low-bg);
+      border-color: var(--status-low-border);
+      color: var(--status-low-text);
+    }
+
+    .rack-card-bottom {
+      border-top: 1px solid var(--card-border);
+      padding-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .rack-card-bottom b {
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 8px 20px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-wrap">
+      <img src="tata_power_ddl_logo_clean.png" alt="TATA POWER-DDL" onerror="this.src='tata_power_ddl_logo.png'">
+      <div>
+        <h1>MMG STORES (KPM) — ALL RACKS MATRIX</h1>
+        <p>10 Bay Storage Racks • Real-Time Shelf-Edge Synchronized Status</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <a href="index.html" class="nav-btn">🖥 Main Monitor</a>
+      <a href="rack_display.html?rack=1" class="nav-btn">📱 Single Rack Kiosk</a>
+      <button class="nav-btn" onclick="toggleTheme()">🌓 Theme</button>
+    </div>
+  </header>
+
+  <div class="matrix-container">
+    <div class="matrix-stats-bar">
+      <div class="stat-pill">
+        <span>Total Racks Monitored:</span>
+        <b>10 BAYS</b>
+      </div>
+      <div class="stat-pill">
+        <span>Total Available Meters:</span>
+        <b id="matrixTotalMeters" style="color: var(--status-ok-text);">--</b>
+      </div>
+      <div class="stat-pill">
+        <span>Critical / Reorder Racks:</span>
+        <b id="matrixAlertCount" style="color: var(--status-low-text);">0</b>
+      </div>
+      <div class="stat-pill">
+        <span>Sync Mode:</span>
+        <span style="color: #10b981; font-weight: 700;">🟢 Live 0ms Synchronized</span>
+      </div>
+    </div>
+
+    <div class="racks-grid" id="racksGridContainer">
+      <!-- Rendered dynamically 1 to 10 -->
+    </div>
+  </div>
+
+  <footer>
+    <span>TATA POWER-DDL MMG STORES (KESHAVPURAM) • 24/7 RACK TELEMETRY</span>
+    <span id="matrixClock">--:--:-- --</span>
+  </footer>
+
+  <script>
+    const DEFAULT_INVENTORY = [
+      { id: 1,  code: "TPDDL-MTR-01", name: "LTCT Meter (Single Phase)", opening: 500, issued: 180, low: 25, high: 60, d1: 20, d2: 18, d3: 16, bay: "Bay A-01 • Tier 2" },
+      { id: 2,  code: "TPDDL-MTR-02", name: "PP WC Meter (Poly Phase)",  opening: 300, issued: 12,  low: 20, high: 50, d1: 11, d2: 10, d3: 9,  bay: "Bay A-02 • Tier 2" },
+      { id: 3,  code: "TPDDL-MTR-03", name: "HT Meter (High Tension)",   opening: 150, issued: 152, low: 15, high: 35, d1: 6,  d2: 5,  d3: 4,  bay: "Bay B-01 • Tier 1" },
+      { id: 4,  code: "TPDDL-MTR-04", name: "Net Meter (Solar Rooftop)", opening: 400, issued: 247, low: 30, high: 70, d1: 16, d2: 14, d3: 13, bay: "Bay B-02 • Tier 1" },
+      { id: 5,  code: "TPDDL-MTR-05", name: "Prepaid Smart Meter",       opening: 250, issued: 215, low: 20, high: 50, d1: 24, d2: 21, d3: 20, bay: "Bay C-01 • Tier 3" },
+      { id: 6,  code: "TPDDL-MTR-06", name: "CT Ratio Meter",            opening: 180, issued: 88,  low: 20, high: 45, d1: 10, d2: 9,  d3: 8,  bay: "Bay C-02 • Tier 3" },
+      { id: 7,  code: "TPDDL-MTR-07", name: "Smart Grid AMI Meter",      opening: 600, issued: 310, low: 40, high: 90, d1: 30, d2: 28, d3: 26, bay: "Bay D-01 • Tier 2" },
+      { id: 8,  code: "TPDDL-MTR-08", name: "Whole Current Meter",       opening: 350, issued: 140, low: 25, high: 60, d1: 15, d2: 14, d3: 13, bay: "Bay D-02 • Tier 2" },
+      { id: 9,  code: "TPDDL-MTR-09", name: "Energy Meter 1-Phase",      opening: 800, issued: 420, low: 50, high: 120, d1: 45, d2: 40, d3: 38, bay: "Bay E-01 • Tier 1" },
+      { id: 10, code: "TPDDL-MTR-10", name: "Energy Meter 3-Phase",      opening: 450, issued: 210, low: 30, high: 75, d1: 22, d2: 20, d3: 19, bay: "Bay E-02 • Tier 1" }
+    ];
+
+    let inventoryData = DEFAULT_INVENTORY;
+
+    function renderMatrix() {
+      const container = document.getElementById('racksGridContainer');
+      container.innerHTML = "";
+      let totalMeters = 0;
+      let alertCount = 0;
+
+      inventoryData.forEach(item => {
+        const opening = Number(item.opening) || 0;
+        const rawIssued = Number(item.issued) || 0;
+        const issued = Math.min(rawIssued, opening);
+        const available = (typeof item.available === 'number') ? Math.max(0, item.available) : (opening - issued);
+        totalMeters += available;
+
+        let statusClass = "";
+        let statusText = "NORMAL";
+        if (rawIssued > opening) {
+          statusClass = "status-low";
+          statusText = "DATA ERR";
+          alertCount++;
+        } else if (available <= item.low) {
+          statusClass = "status-low";
+          statusText = "CRITICAL";
+          alertCount++;
+        } else if (available <= item.high) {
+          statusClass = "status-mid";
+          statusText = "REORDER";
+          alertCount++;
+        }
+
+        const totalForecast3D = (item.d1 || 0) + (item.d2 || 0) + (item.d3 || 0);
+
+        const card = document.createElement('a');
+        card.className = "rack-card";
+        card.href = `rack_display.html?rack=${item.id}`;
+        card.title = `Click to view full Rack ${item.id} dedicated display`;
+        card.innerHTML = `
+          <div>
+            <div class="rack-card-top">
+              <span class="rack-badge">RACK #${String(item.id).padStart(2, '0')}</span>
+              <span class="bay-tag">${item.bay || 'BAY'}</span>
+            </div>
+            <div class="rack-meter-name">${item.name}</div>
+            <div class="rack-meter-code">${item.code}</div>
+          </div>
+
+          <div>
+            <div class="rack-stock-row">
+              <div class="rack-stock-val ${statusClass}">${available.toLocaleString()}</div>
+              <span class="rack-status-tag ${statusClass}">
+                <svg style="width: 12px; height: 12px; fill: currentColor;" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                <span>${statusText}</span>
+              </span>
+            </div>
+            <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Available in Bay</div>
+          </div>
+
+          <div class="rack-card-bottom">
+            <span>Opening: <b>${opening}</b></span>
+            <span>Issued: <b>-${issued}</b></span>
+            <span>3D Pred: <b>${totalForecast3D}</b></span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('matrixTotalMeters').textContent = totalMeters.toLocaleString();
+      document.getElementById('matrixAlertCount').textContent = `${alertCount} RACKS`;
+    }
+
+    // BROADCAST SYNC
+    const syncChannel = new BroadcastChannel('tpddl_inventory_sync');
+    syncChannel.onmessage = (e) => {
+      if (e.data && e.data.updatedInventory) {
+        inventoryData = e.data.updatedInventory;
+        renderMatrix();
+      }
+    };
+
+    // POLLING CLOUD & LOCAL
+    const DEFAULT_GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyyEWweu1qAz_G7A96VtvNkGYY7tJBnv27pFrRomrVCHlp7UXog1B2kAO6lpVPLlE_oyQ/exec";
+    async function syncData() {
+      try {
+        const res = await fetch(DEFAULT_GOOGLE_SHEETS_URL, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.inventory)) {
+            inventoryData = data.inventory;
+            renderMatrix();
+            return;
+          }
+        }
+      } catch (e) {}
+
+      try {
+        const res = await fetch('/api/inventory', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.inventory)) {
+            inventoryData = data.inventory;
+            renderMatrix();
+          }
+        }
+      } catch (e) {}
+    }
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', cur);
+    }
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('matrixClock').textContent = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    setInterval(syncData, 30000);
+    syncData();
+    renderMatrix();
+  </script>
+</body>
+</html>

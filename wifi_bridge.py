@@ -571,6 +571,8 @@ if __name__ == '__main__':
     print(f"  System OS:     {platform.system()} ({platform.release()})")
     print(f"  Local IP:      {get_local_ip()}")
     print(f"  Main Monitor:  http://localhost:{PORT}/index.html")
+    print(f"  Rack Display:  http://localhost:{PORT}/rack_display.html?rack=1")
+    print(f"  Racks Matrix:  http://localhost:{PORT}/rack_matrix.html")
     print(f"  Entry Portal:  http://localhost:{PORT}/store_entry_portal.html")
     print(f"============================================================")
     try:

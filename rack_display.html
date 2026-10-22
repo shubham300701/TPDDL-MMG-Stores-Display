@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MMG Stores (KPM) — Smart Rack Inventory Display</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --tp-blue: #0b4d94;
+      --tp-light-blue: #0284c7;
+      --tp-accent: #0284c7;
+      --bg-main: #f0f4f9;
+      --card-bg: #ffffff;
+      --card-border: #dbe4ef;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-sub: #475569;
+      
+      --status-ok-bg: #ecfdf5;
+      --status-ok-border: #86efac;
+      --status-ok-text: #15803d;
+      
+      --status-mid-bg: #fffbeb;
+      --status-mid-border: #fcd34d;
+      --status-mid-text: #b45309;
+      
+      --status-low-bg: #fef2f2;
+      --status-low-border: #fca5a5;
+      --status-low-text: #dc2626;
+
+      --forecast-purple: #7c3aed;
+      --forecast-bg: #f5f3ff;
+      --forecast-border: #ddd6fe;
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(15,23,42,0.08);
+      --shadow-lg: 0 10px 25px rgba(15,23,42,0.12);
+    }
+
+    [data-theme="dark"] {
+      --bg-main: #0b1120;
+      --card-bg: #131c31;
+      --card-border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-sub: #cbd5e1;
+      
+      --status-ok-bg: rgba(16, 185, 129, 0.15);
+      --status-ok-border: rgba(16, 185, 129, 0.4);
+      --status-ok-text: #34d399;
+      
+      --status-mid-bg: rgba(245, 158, 11, 0.15);
+      --status-mid-border: rgba(245, 158, 11, 0.4);
+      --status-mid-text: #fbbf24;
+      
+      --status-low-bg: rgba(239, 68, 68, 0.18);
+      --status-low-border: rgba(239, 68, 68, 0.5);
+      --status-low-text: #f87171;
+
+      --forecast-purple: #a78bfa;
+      --forecast-bg: rgba(124, 58, 237, 0.15);
+      --forecast-border: rgba(124, 58, 237, 0.35);
+
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    /* KIOSK MODE: Hides header controls for edge-to-edge rack mounting */
+    body.kiosk-mode .rack-top-controls {
+      display: none !important;
+    }
+
+    /* =========================================================================
+       TOP CONTROL BAR (Rack Switcher, Theme, Kiosk Toggle)
+       ========================================================================= */
+    .rack-top-controls {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--card-border);
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+      z-index: 50;
+    }
+
+    .controls-left, .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .selector-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .rack-quick-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .rack-quick-btn:hover {
+      background: var(--tp-light-blue);
+      color: #fff;
+      border-color: var(--tp-light-blue);
+    }
+
+    .rack-quick-btn.active {
+      background: var(--tp-blue);
+      color: #fff;
+      border-color: var(--tp-blue);
+      box-shadow: 0 0 0 2px rgba(11, 77, 148, 0.25);
+    }
+
+    .select-dropdown {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .action-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .action-btn:hover {
+      background: var(--card-border);
+    }
+
+    .live-pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulseGreen 1.6s infinite;
+    }
+
+    @keyframes pulseGreen {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { transform: scale(1.15); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* =========================================================================
+       RACK DISPLAY MAIN CONTAINER
+       ========================================================================= */
+    .rack-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      gap: 12px;
+    }
+
+    /* =========================================================================
+       HERO RACK HEADER BANNER
+       ========================================================================= */
+    .rack-hero-header {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+    }
+
+    .brand-cluster {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo-box {
+      width: 44px;
+      height: 44px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-details h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--tp-blue);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    [data-theme="dark"] .brand-details h1 {
+      color: #38bdf8;
+    }
+
+    .brand-details p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .rack-bay-badge {
+      background: linear-gradient(135deg, #0b4d94, #0284c7);
+      color: #ffffff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+
+    .rack-bay-badge .rack-num-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: 0.5px;
+    }
+
+    .rack-bay-badge .bay-sub-title {
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.9;
+      letter-spacing: 0.3px;
+    }
+
+    /* =========================================================================
+       HERO STOCK DISPLAY PANEL (Massive High-Visibility Number)
+       ========================================================================= */
+    .hero-stock-panel {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-stock-panel.flash-update {
+      animation: flashHighlight 1.4s ease-out;
+    }
+
+    @keyframes flashHighlight {
+      0% { border-color: #3b82f6; box-shadow: 0 0 35px rgba(59, 130, 246, 0.5); transform: scale(1.008); }
+      100% { border-color: var(--card-border); box-shadow: var(--shadow-md); transform: scale(1); }
+    }
+
+    .stock-left-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .meter-headline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .meter-code-pill {
+      background: var(--tp-blue);
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    .meter-name-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+      color: var(--text-main);
+    }
+
+    .big-stock-cluster {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 4px 0;
+    }
+
+    /* HUGE VISIBLE STOCK NUMBER */
+    .huge-stock-number {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 96px;
+      font-weight: 800;
+      line-height: 0.88;
+      letter-spacing: -2px;
+      color: var(--status-ok-text);
+      transition: color 0.3s ease;
+    }
+
+    .huge-stock-number.status-mid {
+      color: var(--status-mid-text);
+    }
+
+    .huge-stock-number.status-low {
+      color: var(--status-low-text);
+    }
+
+    .stock-uom-tag {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .status-pill-big {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: var(--status-ok-bg);
+      border: 1.5px solid var(--status-ok-border);
+      color: var(--status-ok-text);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .status-pill-big.status-mid {
+      background: var(--status-mid-bg);
+      border-color: var(--status-mid-border);
+      color: var(--status-mid-text);
+    }
+
+    .status-pill-big.status-low {
+      background: var(--status-low-bg);
+      border-color: var(--status-low-border);
+      color: var(--status-low-text);
+      animation: pulseAlert 1.8s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(220, 38, 38, 0); }
+    }
+
+    /* STOCK BAR METER */
+    .stock-progress-wrap {
+      margin-top: 6px;
+      max-width: 650px;
+    }
+
+    .progress-bar-rail {
+      height: 12px;
+      background: var(--bg-main);
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      border-radius: 6px;
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-bar-fill.status-mid {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+
+    .progress-bar-fill.status-low {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+
+    .stock-sub-stats {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .stock-sub-stats b {
+      color: var(--text-main);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* RIGHT COLUMN: DIRECT QR CODE FOR STOREKEEPER TROLLEY SCAN */
+    .qr-scan-card {
+      background: var(--bg-main);
+      border: 1.5px dashed var(--card-border);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+      text-align: center;
+    }
+
+    .qr-scan-card img {
+      width: 110px;
+      height: 110px;
+      background: #ffffff;
+      padding: 5px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .qr-scan-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .qr-scan-sub {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* =========================================================================
+       2ND ROW: PREDICTIVE 3-DAY DEMAND + RACK ACTION ADVISORY
+       ========================================================================= */
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .forecast-card-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .forecast-header-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--forecast-purple);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .forecast-days-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .forecast-day-tile {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 6px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .fc-day-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .fc-day-val {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--forecast-purple);
+      line-height: 1;
+    }
+
+    .fc-day-sub {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .forecast-advisory-banner {
+      background: var(--forecast-bg);
+      border: 1px solid var(--forecast-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-main);
+    }
+
+    .forecast-advisory-banner b {
+      color: var(--forecast-purple);
+    }
+
+    /* =========================================================================
+       3RD ROW: LIVE RACK ANALYTICS & RECENT DISPATCHES
+       ========================================================================= */
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chart-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .chart-filter-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .filter-btn {
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--tp-blue);
+      color: #fff;
+      border-color: var(--tp-blue);
+    }
+
+    .canvas-container {
+      width: 100%;
+      height: 180px;
+      position: relative;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* RECENT DISPATCHES TABLE */
+    .dispatch-history-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dispatch-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .dispatch-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: var(--bg-main);
+      border: 1px solid var(--card-border);
+      font-size: 11px;
+    }
+
+    .dispatch-item .meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dispatch-item .site-name {
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .dispatch-item .time-str {
+      font-size: 9px;
+      color: var(--text-muted);
+    }
+
+    .dispatch-qty {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .dispatch-qty.outward {
+      background: rgba(2, 132, 199, 0.12);
+      color: var(--tp-light-blue);
+    }
+
+    .dispatch-qty.inward {
+      background: rgba(16, 185, 129, 0.12);
+      color: #15803d;
+    }
+
+    /* =========================================================================
+       FOOTER STATUS BAR
+       ========================================================================= */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--card-border);
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: auto;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .footer-left, .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .footer-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+    }
+
+    /* RESPONSIVE BREAKPOINTS (Fits Phone / Small Tablet Mounts) */
+    @media (max-width: 900px) {
+      .hero-stock-panel {
+        grid-template-columns: 1fr;
+      }
+      .qr-scan-card {
+        flex-direction: row;
+        justify-content: space-around;
+        width: 100%;
+      }
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+      .huge-stock-number {
+        font-size: 72px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .huge-stock-number {
+        font-size: 56px;
+      }
+      .brand-details h1 {
+        font-size: 15px;
+      }
+      .rack-bay-badge .rack-num-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =======================================================================
+       TOP CONTROL BAR (Rack Switcher, Fullscreen, Kiosk Mode)
+       ======================================================================= -->
+  <div class="rack-top-controls">
+    <div class="controls-left">
+      <span class="selector-label">📍 Assigned Rack:</span>
+      <select id="rackSelectDropdown" class="select-dropdown" onchange="switchRack(parseInt(this.value))">
+        <option value="1">Rack #01 — LTCT Meter (Single Phase) [A-01]</option>
+        <option value="2">Rack #02 — PP WC Meter (Poly Phase) [A-02]</option>
+        <option value="3">Rack #03 — HT Meter (High Tension) [B-01]</option>
+        <option value="4">Rack #04 — Net Meter (Solar Rooftop) [B-02]</option>
+        <option value="5">Rack #05 — Prepaid Smart Meter [C-01]</option>
+        <option value="6">Rack #06 — CT Ratio Meter [C-02]</option>
+        <option value="7">Rack #07 — Smart Grid AMI Meter [D-01]</option>
+        <option value="8">Rack #08 — Whole Current Meter [D-02]</option>
+        <option value="9">Rack #09 — Energy Meter 1-Phase [E-01]</option>
+        <option value="10">Rack #10 — Energy Meter 3-Phase [E-02]</option>
+      </select>
+
+      <div style="display: flex; gap: 4px; flex-wrap: wrap;" id="quickRackButtons">
+        <!-- Rendered dynamically 1 to 10 -->
+      </div>
+    </div>
+
+    <div class="controls-right">
+      <a href="rack_matrix.html" class="action-btn" title="View all racks matrix side-by-side">
+        <span>▦ All Racks Matrix</span>
+      </a>
+      <a href="index.html" class="action-btn" title="Main Universal Store Display">
+        <span>🖥 Main Display</span>
+      </a>
+      <button class="action-btn" id="btnPatrol" onclick="togglePatrolMode()" title="Cycle through racks automatically every 12s">
+        <span>🔄 Auto-Patrol: OFF</span>
+      </button>
+      <button class="action-btn" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+        <span id="themeBtnText">🌓 Theme</span>
+      </button>
+      <button class="action-btn" onclick="toggleKioskFullscreen()" title="Fullscreen Kiosk for Phone/Tablet Mount">
+        <span>⛶ Kiosk</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- =======================================================================
+       RACK DISPLAY MAIN WORKSPACE
+       ======================================================================= -->
+  <div class="rack-container">
+    
+    <!-- HEADER -->
+    <header class="rack-hero-header">
+      <div class="brand-cluster">
+        <div class="brand-logo-box">
+          <img src="tata_power_ddl_logo_clean.png" alt="TATA POWER-DDL" onerror="this.src='tata_power_ddl_logo.png'">
+        </div>
+        <div class="brand-details">
+          <h1>TATA POWER-DDL • MMG STORES</h1>
+          <p>Material Management Group • Keshavpuram Meter Store • Smart Bay Display Unit</p>
+        </div>
+      </div>
+
+      <div class="rack-bay-badge">
+        <div class="rack-num-title" id="rackHeaderId">RACK #01</div>
+        <div class="bay-sub-title" id="bayLocationSub">BAY LOCATION: A-01 • SHELF TIER 2</div>
+      </div>
+    </header>
+
+    <!-- HERO STOCK PANEL (GIANT READABLE NUMBERS) -->
+    <div class="hero-stock-panel" id="heroStockPanel">
+      <div class="stock-left-col">
+        <div class="meter-headline">
+          <span class="meter-code-pill" id="rackMeterCode">TPDDL-MTR-01</span>
+          <span class="meter-name-text" id="rackMeterName">LTCT Meter (Single Phase)</span>
+        </div>
+
+        <div class="big-stock-cluster">
+          <div class="huge-stock-number" id="rackAvailableCount">320</div>
+          <div>
+            <div class="stock-uom-tag">Available Units In Rack</div>
+            <div style="margin-top: 6px;">
+              <span class="status-pill-big" id="rackStatusPill">
+                <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+                <span id="rackStatusText">NORMAL</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGRESS BAR -->
+        <div class="stock-progress-wrap">
+          <div class="progress-bar-rail">
+            <div class="progress-bar-fill" id="rackProgressFill" style="width: 64%;"></div>
+          </div>
+          <div class="stock-sub-stats">
+            <span>Opening Stock: <b id="subOpening">500</b></span>
+            <span>•</span>
+            <span>Issued Today: <b id="subIssued" style="color: var(--tp-light-blue);">-180</b></span>
+            <span>•</span>
+            <span>Min Buffer: <b id="subLow">25</b></span>
+            <span>•</span>
+            <span>Reorder: <b id="subHigh">60</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCAN-TO-ISSUE QR CODE -->
+      <div class="qr-scan-card">
+        <img id="rackQrImage" src="" alt="Scan QR Code to Issue">
+        <div class="qr-scan-label">📲 Scan to Dispatch</div>
+        <div class="qr-scan-sub">Pre-selects Rack & Meter</div>
+      </div>
+    </div>
+
+    <!-- PREDICTIVE 3-DAY DEMAND FORECAST FOR THIS RACK -->
+    <div class="forecast-grid">
+      <div class="forecast-card-box">
+        <div class="forecast-header-title">
+          <span>🔮 3-Day Predictive Demand Engine</span>
+          <span id="fcDateRangeSub" style="font-size: 11px; color: var(--text-muted);">(Rolling 72h)</span>
+        </div>
+
+        <div class="forecast-days-row">
+          <div class="forecast-day-tile">
+            <span class="fc-day-name" id="fcDay1Name">Tue (21 Oct)</span>
+            <span class="fc-day-val" id="fcDay1Val">20</span>
+            <span class="fc-day-sub">Projected Units</span>
+          </div>
+          <div class="forecast-day-tile">
+            <span class="fc-day-name" id="fcDay2Name">Wed (22 Oct)</span>
+            <span class="fc-day-val" id="fcDay2Val">18</span>
+            <span class="fc-day-sub">Projected Units</span>
+          </div>
+          <div class="forecast-day-tile">
+            <span class="fc-day-name" id="fcDay3Name">Thu (23 Oct)</span>
+            <span class="fc-day-val" id="fcDay3Val">16</span>
+            <span class="fc-day-sub">Projected Units</span>
+          </div>
+        </div>
+
+        <div class="forecast-advisory-banner" id="fcAdvisoryBanner">
+          <b>✓ SAFE BUFFER:</b> Rack inventory safely covers the next 3 days projected indent demand of <b>54 units</b>.
+        </div>
+      </div>
+
+      <!-- RECENT DISPATCHES FOR THIS RACK -->
+      <div class="dispatch-history-card">
+        <div style="font-size: 13px; font-weight: 800; color: var(--text-main); display: flex; align-items: center; justify-content: space-between;">
+          <span>📋 Recent Rack Transactions</span>
+          <span style="font-size: 11px; font-weight: 600; color: var(--tp-light-blue);">Live Ledger</span>
+        </div>
+        <div class="dispatch-list" id="rackDispatchList">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE RACK ANALYTICS GRAPH -->
+    <div class="analytics-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">
+            <svg style="width: 16px; height: 16px; fill: var(--tp-light-blue);" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>
+            <span>Live Consumption Trend & 3-Day Projection</span>
+          </div>
+          <div class="chart-filter-group">
+            <button class="filter-btn active" onclick="setChartFilter('30D', this)">30 Days</button>
+            <button class="filter-btn" onclick="setChartFilter('Q1', this)">Q1</button>
+            <button class="filter-btn" onclick="setChartFilter('Q2', this)">Q2</button>
+          </div>
+        </div>
+        <div class="canvas-container">
+          <canvas id="rackTrendCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- HARDWARE SPECS / QUICK STATS -->
+      <div class="chart-card">
+        <div class="chart-title">
+          <span>⚙️ Rack Specifications</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; margin-top: 4px;">
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">
+            <span style="color: var(--text-muted);">Rack Unit ID:</span>
+            <b style="font-family: 'JetBrains Mono', monospace;" id="specRackId">RACK-01</b>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">
+            <span style="color: var(--text-muted);">Sub-Bay Allocation:</span>
+            <b id="specBay">Bay A, Row 1, Tier 2</b>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">
+            <span style="color: var(--text-muted);">Default Reorder Threshold:</span>
+            <b id="specThreshold">60 Units</b>
+          </div>
+          <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--card-border); padding-bottom: 5px;">
+            <span style="color: var(--text-muted);">Sync Mode:</span>
+            <span style="color: #10b981; font-weight: 700;">Bidirectional Webhook</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding-top: 2px;">
+            <span style="color: var(--text-muted);">Last Sync Stamp:</span>
+            <span id="specLastSync" style="font-size: 11px; font-weight: 600;">Just now</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =======================================================================
+       FOOTER STATUS BAR
+       ======================================================================= -->
+  <footer>
+    <div class="footer-left">
+      <div class="footer-pill">
+        <span class="live-pulse-dot"></span>
+        <span id="footerSyncStatus">Connected • Real-Time Shelf Sync</span>
+      </div>
+      <span>•</span>
+      <span id="footerClock">--:--:-- --</span>
+    </div>
+    <div class="footer-right">
+      <span>TATA POWER DELHI DISTRIBUTION LIMITED</span>
+      <span>•</span>
+      <span>KESHAVPURAM MMG STORES</span>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // INVENTORY DATASET & RACK MAPPING
+    // =========================================================================
+    const DEFAULT_INVENTORY = [
+      { id: 1,  code: "TPDDL-MTR-01", name: "LTCT Meter (Single Phase)", opening: 500, issued: 180, low: 25, high: 60, d1: 20, d2: 18, d3: 16, bay: "Bay A-01 • Tier 2", lastUpdated: "19.10.2026, 12:15 PM" },
+      { id: 2,  code: "TPDDL-MTR-02", name: "PP WC Meter (Poly Phase)",  opening: 300, issued: 12,  low: 20, high: 50, d1: 11, d2: 10, d3: 9,  bay: "Bay A-02 • Tier 2", lastUpdated: "19.10.2026, 10:45 AM" },
+      { id: 3,  code: "TPDDL-MTR-03", name: "HT Meter (High Tension)",   opening: 150, issued: 152, low: 15, high: 35, d1: 6,  d2: 5,  d3: 4,  bay: "Bay B-01 • Tier 1", lastUpdated: "19.10.2026, 11:30 AM" },
+      { id: 4,  code: "TPDDL-MTR-04", name: "Net Meter (Solar Rooftop)", opening: 400, issued: 247, low: 30, high: 70, d1: 16, d2: 14, d3: 13, bay: "Bay B-02 • Tier 1", lastUpdated: "19.10.2026, 12:12 PM" },
+      { id: 5,  code: "TPDDL-MTR-05", name: "Prepaid Smart Meter",       opening: 250, issued: 215, low: 20, high: 50, d1: 24, d2: 21, d3: 20, bay: "Bay C-01 • Tier 3", lastUpdated: "19.10.2026, 09:40 AM" },
+      { id: 6,  code: "TPDDL-MTR-06", name: "CT Ratio Meter",            opening: 180, issued: 88,  low: 20, high: 45, d1: 10, d2: 9,  d3: 8,  bay: "Bay C-02 • Tier 3", lastUpdated: "19.10.2026, 05:30 PM" },
+      { id: 7,  code: "TPDDL-MTR-07", name: "Smart Grid AMI Meter",      opening: 600, issued: 310, low: 40, high: 90, d1: 30, d2: 28, d3: 26, bay: "Bay D-01 • Tier 2", lastUpdated: "19.10.2026, 09:15 AM" },
+      { id: 8,  code: "TPDDL-MTR-08", name: "Whole Current Meter",       opening: 350, issued: 140, low: 25, high: 60, d1: 15, d2: 14, d3: 13, bay: "Bay D-02 • Tier 2", lastUpdated: "19.10.2026, 04:50 PM" },
+      { id: 9,  code: "TPDDL-MTR-09", name: "Energy Meter 1-Phase",      opening: 800, issued: 420, low: 50, high: 120, d1: 45, d2: 40, d3: 38, bay: "Bay E-01 • Tier 1", lastUpdated: "19.10.2026, 08:30 AM" },
+      { id: 10, code: "TPDDL-MTR-10", name: "Energy Meter 3-Phase",      opening: 450, issued: 210, low: 30, high: 75, d1: 22, d2: 20, d3: 19, bay: "Bay E-02 • Tier 1", lastUpdated: "19.10.2026, 03:20 PM" }
+    ];
+
+    let inventoryData = DEFAULT_INVENTORY;
+    let currentRackId = 1;
+    let currentChartFilter = '30D';
+    let isPatrolMode = false;
+    let patrolInterval = null;
+
+    // Check URL parameters for assigned rack (?rack=1 or ?code=TPDDL-MTR-01)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('kiosk') === '1' || urlParams.get('display') === '1') {
+      document.body.classList.add('kiosk-mode');
+    }
+
+    if (urlParams.has('rack')) {
+      currentRackId = parseInt(urlParams.get('rack')) || 1;
+    } else if (urlParams.has('id')) {
+      currentRackId = parseInt(urlParams.get('id')) || 1;
+    } else if (urlParams.has('code')) {
+      const targetCode = urlParams.get('code').toUpperCase();
+      const match = DEFAULT_INVENTORY.find(i => i.code === targetCode);
+      if (match) currentRackId = match.id;
+    } else {
+      // Check stored preference for this physical device
+      const savedRack = localStorage.getItem('tpddl_assigned_rack');
+      if (savedRack) currentRackId = parseInt(savedRack) || 1;
+    }
+
+    // Save active rack
+    localStorage.setItem('tpddl_assigned_rack', currentRackId);
+
+    // =========================================================================
+    // RACK BUTTONS BUILDER
+    // =========================================================================
+    function buildQuickRackButtons() {
+      const container = document.getElementById('quickRackButtons');
+      container.innerHTML = "";
+      for (let r = 1; r <= 10; r++) {
+        const btn = document.createElement('button');
+        btn.className = `rack-quick-btn ${r === currentRackId ? 'active' : ''}`;
+        btn.textContent = `R${r}`;
+        btn.title = `Switch to Rack ${r}`;
+        btn.onclick = () => switchRack(r);
+        container.appendChild(btn);
+      }
+      document.getElementById('rackSelectDropdown').value = currentRackId;
+    }
+
+    function switchRack(newRackId) {
+      currentRackId = newRackId;
+      localStorage.setItem('tpddl_assigned_rack', currentRackId);
+      buildQuickRackButtons();
+      renderRackDisplay();
+      
+      // Update browser URL without reloading
+      const url = new URL(window.location);
+      url.searchParams.set('rack', currentRackId);
+      window.history.replaceState({}, '', url);
+    }
+
+    // =========================================================================
+    // DYNAMIC 3-DAY FORECAST & ROLLING DATE ENGINE
+    // =========================================================================
+    function getForecastDayInfo(baseDate = new Date()) {
+      const d1 = new Date(baseDate);
+      d1.setDate(d1.getDate() + 1);
+
+      const d2 = new Date(baseDate);
+      d2.setDate(d2.getDate() + 2);
+
+      const d3 = new Date(baseDate);
+      d3.setDate(d3.getDate() + 3);
+
+      const shortDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const fullDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      const monthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+      const fmtShortDate = (d) => `${d.getDate()} ${monthsShort[d.getMonth()]}`;
+
+      return {
+        d1: { short: shortDays[d1.getDay()], dateStr: fmtShortDate(d1), label: `${shortDays[d1.getDay()]} (${fmtShortDate(d1)})` },
+        d2: { short: shortDays[d2.getDay()], dateStr: fmtShortDate(d2), label: `${shortDays[d2.getDay()]} (${fmtShortDate(d2)})` },
+        d3: { short: shortDays[d3.getDay()], full: fullDays[d3.getDay()], dateStr: fmtShortDate(d3), label: `${shortDays[d3.getDay()]} (${fmtShortDate(d3)})` },
+        rangeStr: `(${fmtShortDate(d1)} to ${fmtShortDate(d3)})`
+      };
+    }
+
+    // =========================================================================
+    // RENDER ACTIVE RACK DISPLAY
+    // =========================================================================
+    function renderRackDisplay() {
+      const item = inventoryData.find(i => i.id === currentRackId) || inventoryData[0];
+      const fc = getForecastDayInfo();
+
+      const opening = Number(item.opening) || 0;
+      const rawIssued = Number(item.issued) || 0;
+      const issued = Math.min(rawIssued, opening); // Capped by hard rule
+      const available = (typeof item.available === 'number') ? Math.max(0, item.available) : (opening - issued);
+      const totalForecast = (item.d1 || 0) + (item.d2 || 0) + (item.d3 || 0);
+
+      // Header labels
+      document.getElementById('rackHeaderId').textContent = `RACK #${String(item.id).padStart(2, '0')}`;
+      document.getElementById('bayLocationSub').textContent = `LOCATION: ${item.bay || 'BAY A • TIER 2'} • MMG STORE (KPM)`;
+      document.getElementById('rackMeterCode').textContent = item.code;
+      document.getElementById('rackMeterName').textContent = item.name;
+
+      // Big Stock Count
+      const countEl = document.getElementById('rackAvailableCount');
+      countEl.textContent = available.toLocaleString();
+
+      // Status pill styling
+      const pill = document.getElementById('rackStatusPill');
+      const text = document.getElementById('rackStatusText');
+      const progressFill = document.getElementById('rackProgressFill');
+
+      pill.classList.remove('status-mid', 'status-low');
+      countEl.classList.remove('status-mid', 'status-low');
+      progressFill.classList.remove('status-mid', 'status-low');
+
+      if (rawIssued > opening) {
+        pill.classList.add('status-low');
+        countEl.classList.add('status-low');
+        progressFill.classList.add('status-low');
+        text.textContent = "DATA ERR";
+      } else if (available <= item.low) {
+        pill.classList.add('status-low');
+        countEl.classList.add('status-low');
+        progressFill.classList.add('status-low');
+        text.textContent = "CRITICAL";
+      } else if (available <= item.high) {
+        pill.classList.add('status-mid');
+        countEl.classList.add('status-mid');
+        progressFill.classList.add('status-mid');
+        text.textContent = "REORDER";
+      } else {
+        text.textContent = "NORMAL";
+      }
+
+      // Progress bar fill %
+      const pct = opening > 0 ? Math.min(100, Math.max(0, Math.round((available / opening) * 100))) : 0;
+      progressFill.style.width = `${pct}%`;
+
+      // Sub-stats
+      document.getElementById('subOpening').textContent = opening.toLocaleString();
+      document.getElementById('subIssued').textContent = `-${issued.toLocaleString()}`;
+      document.getElementById('subLow').textContent = item.low.toLocaleString();
+      document.getElementById('subHigh').textContent = item.high.toLocaleString();
+
+      // Forecast tiles
+      document.getElementById('fcDateRangeSub').textContent = fc.rangeStr;
+      document.getElementById('fcDay1Name').textContent = fc.d1.label;
+      document.getElementById('fcDay1Val').textContent = item.d1 || 0;
+      document.getElementById('fcDay2Name').textContent = fc.d2.label;
+      document.getElementById('fcDay2Val').textContent = item.d2 || 0;
+      document.getElementById('fcDay3Name').textContent = fc.d3.label;
+      document.getElementById('fcDay3Val').textContent = item.d3 || 0;
+
+      // Advisory
+      const adv = document.getElementById('fcAdvisoryBanner');
+      if (available < totalForecast) {
+        const def = totalForecast - available;
+        adv.innerHTML = `🚨 <b>URGENT INDENT:</b> Demand of <b>${totalForecast} units</b> exceeds rack stock by <b>${def} units</b>. Initiate procurement immediately!`;
+        adv.style.borderColor = 'var(--status-low-border)';
+        adv.style.background = 'var(--status-low-bg)';
+      } else if (available < totalForecast * 1.5) {
+        adv.innerHTML = `⚠️ <b>TIGHT BUFFER:</b> Stock will deplete to ~<b>${available - totalForecast} units</b> by ${fc.d3.full}. Indent recommended.`;
+        adv.style.borderColor = 'var(--status-mid-border)';
+        adv.style.background = 'var(--status-mid-bg)';
+      } else {
+        adv.innerHTML = `✓ <b>SAFE BUFFER:</b> Rack inventory safely covers the next 3 days projected indent demand of <b>${totalForecast} units</b>.`;
+        adv.style.borderColor = 'var(--forecast-border)';
+        adv.style.background = 'var(--forecast-bg)';
+      }
+
+      // Specs
+      document.getElementById('specRackId').textContent = `RACK-${String(item.id).padStart(2, '0')}`;
+      document.getElementById('specBay').textContent = item.bay || 'General Bay Area';
+      document.getElementById('specThreshold').textContent = `${item.high} Units (Min: ${item.low})`;
+      document.getElementById('specLastSync').textContent = item.lastUpdated || 'Realtime Sync';
+
+      // QR Code update for quick trolley scan
+      updateRackQrCode(item);
+
+      // Render recent ledger
+      renderRecentDispatches(item);
+
+      // Render Canvas Graph
+      drawRackTrend(item);
+    }
+
+    // =========================================================================
+    // DYNAMIC QR CODE BUILDER (Pre-selects this Rack on Mobile Portal)
+    // =========================================================================
+    function updateRackQrCode(item) {
+      const host = (window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1')
+        ? window.location.hostname
+        : '127.0.0.1';
+      const port = window.location.port ? `:${window.location.port}` : (window.location.protocol === 'http:' ? ':8765' : '');
+      const mobileUrl = `${window.location.protocol}//${host}${port}/store_entry_portal.html?rack=${item.id}&meter=${encodeURIComponent(item.name)}`;
+      
+      const qrEl = document.getElementById('rackQrImage');
+      qrEl.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(mobileUrl)}`;
+    }
+
+    // =========================================================================
+    // RECENT TRANSACTIONS FOR THIS RACK
+    // =========================================================================
+    function renderRecentDispatches(item) {
+      const container = document.getElementById('rackDispatchList');
+      const dummyDispatches = [
+        { site: "Pitampura 66kV Grid", qty: -10, type: "OUTWARD", time: "Today, 11:45 AM" },
+        { site: "Rohini Sector 7 Feeder", qty: -25, type: "OUTWARD", time: "Today, 10:20 AM" },
+        { site: "Factory Shipment Receipt", qty: 150, type: "INWARD", time: "18.10.2026, 04:30 PM" },
+        { site: "Work Order #WO-8912", qty: -15, type: "OUTWARD", time: "18.10.2026, 02:15 PM" },
+        { site: "Emergency Fault Replace", qty: -5, type: "OUTWARD", time: "17.10.2026, 06:40 PM" }
+      ];
+
+      container.innerHTML = dummyDispatches.map(d => `
+        <div class="dispatch-item">
+          <div class="meta">
+            <span class="site-name">${d.site}</span>
+            <span class="time-str">${d.time}</span>
+          </div>
+          <span class="dispatch-qty ${d.type === 'OUTWARD' ? 'outward' : 'inward'}">
+            ${d.qty > 0 ? '+' : ''}${d.qty}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // =========================================================================
+    // CANVAS CHART: RACK CONSUMPTION & PREDICTION TREND
+    // =========================================================================
+    function setChartFilter(filter, btn) {
+      currentChartFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const item = inventoryData.find(i => i.id === currentRackId) || inventoryData[0];
+      drawRackTrend(item);
+    }
+
+    function drawRackTrend(item) {
+      const canvas = document.getElementById('rackTrendCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = (rect.width || 600) * window.devicePixelRatio;
+      canvas.height = (rect.height || 180) * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const W = rect.width || 600;
+      const H = rect.height || 180;
+      ctx.clearRect(0, 0, W, H);
+
+      const points = 7;
+      const labels = ["Day -6", "Day -4", "Day -2", "Yesterday", "Today", "+2D", "+3D Pred"];
+      
+      const open = item.opening || 400;
+      const finalAvail = item.opening - item.issued;
+      const totalForecast = item.d1 + item.d2 + item.d3;
+
+      const data = [];
+      for (let p = 0; p < points - 2; p++) {
+        data.push(Math.round(open - item.issued * (0.3 + 0.6 * (p / (points - 3)))));
+      }
+      data.push(finalAvail); // Today
+      data.push(Math.max(0, finalAvail - Math.round(totalForecast * 0.6))); // +2D
+      data.push(Math.max(0, finalAvail - totalForecast)); // +3D
+
+      const maxVal = open * 1.15;
+      const minVal = 0;
+
+      const pL = 40, pR = 20, pT = 15, pB = 25;
+      const gW = W - pL - pR;
+      const gH = H - pT - pB;
+
+      // Draw Grid lines
+      ctx.strokeStyle = isDark ? '#1e293b' : '#e2e8f0';
+      ctx.lineWidth = 1;
+      for (let g = 0; g <= 3; g++) {
+        const y = pT + (gH / 3) * g;
+        ctx.beginPath();
+        ctx.moveTo(pL, y);
+        ctx.lineTo(W - pR, y);
+        ctx.stroke();
+
+        ctx.fillStyle = isDark ? '#64748b' : '#94a3b8';
+        ctx.font = '10px Inter';
+        ctx.textAlign = 'right';
+        const val = Math.round(maxVal - (maxVal / 3) * g);
+        ctx.fillText(val, pL - 6, y + 3);
+      }
+
+      // Draw Area Fill
+      ctx.beginPath();
+      const coords = [];
+      data.forEach((val, i) => {
+        const x = pL + (gW / (points - 1)) * i;
+        const y = pT + gH - ((val - minVal) / (maxVal - minVal)) * gH;
+        coords.push({x, y});
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.lineTo(coords[coords.length - 1].x, pT + gH);
+      ctx.lineTo(coords[0].x, pT + gH);
+      ctx.closePath();
+
+      const grad = ctx.createLinearGradient(0, pT, 0, pT + gH);
+      grad.addColorStop(0, 'rgba(2, 132, 199, 0.35)');
+      grad.addColorStop(1, 'rgba(2, 132, 199, 0.0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Draw Trend Line
+      ctx.beginPath();
+      coords.forEach((pt, i) => {
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      });
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Points & Labels
+      coords.forEach((pt, i) => {
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, (i >= points - 2 ? 4.5 : 3.5), 0, Math.PI * 2);
+        ctx.fillStyle = (i >= points - 2) ? '#7c3aed' : '#0284c7';
+        ctx.fill();
+        ctx.strokeStyle = isDark ? '#131c31' : '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // X Axis labels
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        ctx.font = '10px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(labels[i], pt.x, H - 6);
+      });
+    }
+
+    // =========================================================================
+    // AUTO-PATROL MODE (Cycles through all 10 racks automatically)
+    // =========================================================================
+    function togglePatrolMode() {
+      isPatrolMode = !isPatrolMode;
+      const btn = document.getElementById('btnPatrol');
+      if (isPatrolMode) {
+        btn.innerHTML = `<span>🔄 Auto-Patrol: ON (12s)</span>`;
+        btn.style.background = '#0284c7';
+        btn.style.color = '#fff';
+        patrolInterval = setInterval(() => {
+          let next = currentRackId + 1;
+          if (next > 10) next = 1;
+          switchRack(next);
+        }, 12000);
+      } else {
+        btn.innerHTML = `<span>🔄 Auto-Patrol: OFF</span>`;
+        btn.style.background = '';
+        btn.style.color = '';
+        clearInterval(patrolInterval);
+      }
+    }
+
+    // =========================================================================
+    // THEME & KIOSK FULLSCREEN TOGGLE
+    // =========================================================================
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('tpddl_rack_theme', target);
+      document.getElementById('themeBtnText').textContent = target === 'dark' ? '☀️ Light' : '🌙 Dark';
+      const item = inventoryData.find(i => i.id === currentRackId) || inventoryData[0];
+      drawRackTrend(item);
+    }
+
+    const savedTheme = localStorage.getItem('tpddl_rack_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    function toggleKioskFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        document.body.classList.add('kiosk-mode');
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        document.body.classList.remove('kiosk-mode');
+      }
+    }
+
+    // =========================================================================
+    // CLOCK RUNNER
+    // =========================================================================
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+      const dateStr = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short' });
+      document.getElementById('footerClock').textContent = `${dateStr} • ${timeStr}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // =========================================================================
+    // REAL-TIME SYNCHRONIZATION ENGINE
+    // =========================================================================
+    // 1. BroadcastChannel: 0ms cross-device local sync
+    const syncChannel = new BroadcastChannel('tpddl_inventory_sync');
+    syncChannel.onmessage = (e) => {
+      if (e.data && e.data.type === 'STOCK_UPDATED' && e.data.updatedInventory) {
+        console.log("⚡ Instant Rack Sync received:", e.data);
+        inventoryData = e.data.updatedInventory;
+        triggerRackUpdateAnimation(e.data.meter);
+      }
+    };
+
+    // 2. Storage event
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'tpddl_inventory_data' && e.newValue) {
+        try {
+          inventoryData = JSON.parse(e.newValue);
+          triggerRackUpdateAnimation();
+        } catch (err) {}
+      }
+    });
+
+    // 3. Polling Google Sheets Cloud & Local Bridge
+    const DEFAULT_GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyyEWweu1qAz_G7A96VtvNkGYY7tJBnv27pFrRomrVCHlp7UXog1B2kAO6lpVPLlE_oyQ/exec";
+    async function syncFromCloudAndBridge() {
+      // Try Google Sheets
+      try {
+        const res = await fetch(DEFAULT_GOOGLE_SHEETS_URL, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.inventory) && data.inventory.length > 0) {
+            inventoryData = data.inventory;
+            renderRackDisplay();
+            document.getElementById('footerSyncStatus').textContent = "🟢 Cloud Synced • Google Sheets Live";
+            return;
+          }
+        }
+      } catch (err) {}
+
+      // Fallback local python bridge
+      try {
+        const res = await fetch('/api/inventory', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.inventory)) {
+            inventoryData = data.inventory;
+            renderRackDisplay();
+            document.getElementById('footerSyncStatus').textContent = "🟡 Local Bridge Synced • 8765";
+          }
+        }
+      } catch (err) {}
+    }
+
+    function triggerRackUpdateAnimation(changedMeterName) {
+      renderRackDisplay();
+      const panel = document.getElementById('heroStockPanel');
+      panel.classList.remove('flash-update');
+      void panel.offsetWidth; // trigger reflow
+      panel.classList.add('flash-update');
+    }
+
+    setInterval(syncFromCloudAndBridge, 30000);
+    syncFromCloudAndBridge();
+
+    // Initial render
+    buildQuickRackButtons();
+    renderRackDisplay();
+
+    // Window resize chart re-render
+    window.addEventListener('resize', () => {
+      const item = inventoryData.find(i => i.id === currentRackId) || inventoryData[0];
+      drawRackTrend(item);
+    });
+  </script>
+</body>
+</html>
